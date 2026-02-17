@@ -1,38 +1,42 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { Alert, Platform, StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
-  useSafeAreaInsets,
+  SafeAreaView,
 } from 'react-native-safe-area-context';
+import { MyStack } from './app/routes/stack';
+import { Provider, useDispatch } from 'react-redux';
+import { store } from './app/redux/store/store';
+import { ThemeProvider, useTheme } from './app/theme/ThemeContext';
+import { useAppSelector } from './app/redux/hook/hook';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+function AppContent() {
+  const { theme , themeColor} = useTheme();
+  const user = useAppSelector((state) => state.auth.user)
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
+
+      <SafeAreaView style={[styles.container, { backgroundColor:  'transparent' }]} edges={['top', 'bottom']}>
+        <MyStack />
+      </SafeAreaView>
+    </>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
+function App() {
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
+    <Provider store={store}>
+      <ThemeProvider>
+        <SafeAreaProvider>
+          <AppContent />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </Provider>
   );
 }
 
