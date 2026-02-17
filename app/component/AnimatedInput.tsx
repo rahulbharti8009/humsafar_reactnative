@@ -34,7 +34,6 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   ...props
 }) => {
     const [isFocused, setIsFocused] = useState(true);
-    const user = useAppSelector((state) => state.auth.user)
     const {theme, themeColor } = useTheme();
 
     let getColor =()=> {
@@ -59,7 +58,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
         secureTextEntry={isOtp}
         autoFocus={true} 
         textContentType="oneTimeCode"
-        style={[styles.input,{ borderColor: isFocused ? user?.color != null ? user?.color : themeColor.borderColor : '#B0B0B0' , textAlign:  'center'  , color: getColor()
+        style={[styles.input,{ borderColor: isFocused ?  themeColor.borderColor : '#B0B0B0' , textAlign:  'center'  , color: getColor()
     }]}
       />
     </View>

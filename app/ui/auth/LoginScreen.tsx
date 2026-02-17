@@ -38,7 +38,7 @@ export const LoginScreen = () => {
 
 
         <AnimatedInput
-          label="Email Address"
+          label="Password"
           placeholder="Email Address"
           value={password}
           isTheme={false}
