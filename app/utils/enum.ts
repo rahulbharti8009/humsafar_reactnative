@@ -1,6 +1,7 @@
 export enum RouteName {
     Login = 'Login',
-    Home = 'Home',
+    Dashboard = 'Dashboard',
+    Otp = 'Otp',
     Users = 'Users',
     Profile = 'Profile',
     ChatHistory = 'ChatHistory',

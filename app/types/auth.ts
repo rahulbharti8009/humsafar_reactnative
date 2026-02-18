@@ -1,7 +1,7 @@
 
 export interface LoginPayload {
-    mobile: string;
-    name?: string;
+    email: string;
+    otp?: string;
   }
   
   export interface Chat {
@@ -25,14 +25,17 @@ export interface LoginPayload {
   // User model
   export interface User {
     _id: string;
-    color: string;
-    mobile: string;
+    email: string;
+    status : boolean
     name: string;
     chat: Chat[];
     invite: Invite[];
     requestType: string;
     createdAt: string;
     updatedAt: string;
+    message: string;
+    fcmToken: string;
+    __v: number;  
   }
   
   export interface LoginResponse {

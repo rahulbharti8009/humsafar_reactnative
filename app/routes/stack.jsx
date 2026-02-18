@@ -8,6 +8,7 @@ import { DashboardScreen } from '../ui/dashboard/DashboardScreen';
 import { LoginScreen } from '../ui/auth/LoginScreen';
 import { useAppSelector } from '../redux/hook/hook';
 import { login } from '../redux/slice/authSlice';
+import { OtpScreen } from '../ui/auth/OtpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,10 +36,12 @@ export const MyStack = () => {
     <NavigationContainer>
     <Stack.Navigator
       screenOptions={{ headerShown: false, animation: 'slide_from_right', }}
-      initialRouteName={user != null ? RouteName.Home : RouteName.Login}
+      initialRouteName={user != null ? RouteName.Dashboard : RouteName.Login}
     >
       <Stack.Screen name={RouteName.Login} component={LoginScreen} />
-      <Stack.Screen name={RouteName.Home} component={DashboardScreen} />
+      <Stack.Screen name={RouteName.Dashboard} component={DashboardScreen} />
+      <Stack.Screen name={RouteName.Otp} component={OtpScreen} />
+
     </Stack.Navigator>
     </NavigationContainer>
   );

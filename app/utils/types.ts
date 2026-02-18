@@ -2,7 +2,8 @@ import { Chat, User } from "../types/auth";
 
 export type RootStackParamList = {
     Login: undefined;
-    Home: undefined;
+    Dashboard: { user: User };
+    Otp: { email: string };
     Users:undefined;
     Profile: undefined;
     ChatHistory : {user: Chat};
