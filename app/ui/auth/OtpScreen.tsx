@@ -16,6 +16,7 @@ import { getLoginData, setLoginSave } from '../../utils/localDB';
 import { LoginPayload, User } from '../../types/auth';
 import { postApi } from '../../types/genericType';
 import { ENDPOINT } from '../../api/endpoint';
+import { ProfileEntity } from '../../types/profile.type';
 
 const OTP_LENGTH = 6;
 const TIMER_DURATION = 300; // 5 minutes in seconds
@@ -118,7 +119,31 @@ const handleChange = (text: string, index: number) => {
     setTimeLeft(TIMER_DURATION);
     setOtp(new Array(OTP_LENGTH).fill(''));
     inputs.current[0].focus();
+    onLogin();
   };
+
+  const onLogin = async () => {
+       
+          try {
+              const payload: LoginPayload = {
+                  email: email
+                };
+                setLoading(prev => prev = true)
+                const res = await postApi<User, LoginPayload>(
+                  ENDPOINT.AUTH.LOGIN,
+                  payload 
+                );
+                    if(res.status) {
+                    } else {
+                      Alert.alert("Error", res.message);
+                    }
+              } catch (error) {
+               console.log(  error);
+                Alert.alert("Error", "Something went wrong");
+              } finally {
+              setLoading(false); 
+             }
+        };
 
 
       const onVerify = async () => {
@@ -133,9 +158,9 @@ const handleChange = (text: string, index: number) => {
                 payload 
               );
                   if(res.status) {
-                    // Alert.alert("success", res.message);
-                    await setLoginSave(res.value!);
-                    navigation.navigate(RouteName.Dashboard, { user: res.value! });
+                          // Alert.alert("success", res.message);
+                        await setLoginSave(res.value!);
+                         navigation.navigate(RouteName.Dashboard, { user: res.value! });
                   } else {
                     Alert.alert("Error", res.message);
                   }
@@ -170,7 +195,7 @@ const handleChange = (text: string, index: number) => {
       </View>
 
       <Text style={styles.timer}>
-        {timeLeft > 0 ? `00:${formatTime(timeLeft)}` : 'OTP Expired'}
+        {timeLeft > 0 ? `0${formatTime(timeLeft)}` : 'OTP Expired'}
       </Text>
 
       {timeLeft === 0 && (

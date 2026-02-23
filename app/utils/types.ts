@@ -1,11 +1,12 @@
 import { Chat, User } from "../types/auth";
+import { ProfileEntity } from "../types/profile.type";
 
 export type RootStackParamList = {
     Login: undefined;
-    Dashboard: { user: User };
+    Dashboard: { user: ProfileEntity };
     Otp: { email: string };
     Users:undefined;
-    Profile: undefined;
+    Profile: {user: ProfileEntity};
     ChatHistory : {user: Chat};
     AddGroupUI : undefined;
     VideoCall: {}

@@ -6,12 +6,10 @@ export class ENDPOINT {
    static AUTH = {
     LOGIN: `/send-otp`,
     VERIFY_OTP: `/verify-otp`,
-
-    // VERIFY_OTP: `${API.BASE_URL}/auth/verify-otp`,
-    // RESEND_OTP: `${API.BASE_URL}/auth/resend-otp`,
   };
-    static USER = {
-    // PROFILE: `${API.BASE_URL}/user/profile`,
-    // UPDATE_PROFILE: `${API.BASE_URL}/user/update`,
+    static PROFILE = {
+   PROFILE_LIST : `/profileList`,
+   PROFILE_DETAILS : `/save_profile`,
+   PROFILR_PICTURE : `/profilePic`,
   };
 }

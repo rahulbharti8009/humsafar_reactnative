@@ -1,0 +1,95 @@
+
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useTheme } from "../../../theme/ThemeContext";
+
+type Props = {
+  currentStep: number;
+};
+
+const steps = ["Personal", "Education", "Preference"];
+
+export default function Stepper({ currentStep }: Props) {
+        const { theme , themeColor} = useTheme();
+    
+  return (
+    <View style={[styles.container,{backgroundColor:themeColor.background}]}>
+      {steps.map((label, index) => {
+        const stepNumber = index + 1;
+
+        const isCompleted = currentStep > stepNumber;
+        const isActive = currentStep === stepNumber;
+
+        return (
+          <React.Fragment key={index}>
+            <View style={styles.stepContainer}>
+              <View
+                style={[
+                  styles.circle,{backgroundColor: themeColor.inputBackground},
+                  isCompleted && styles.completed,
+                  isActive && styles.active,
+                ]}
+              >
+                <Text style={[styles.number,{color:themeColor.text}]}>{stepNumber}</Text>
+              </View>
+              <Text style={[styles.label,{color:themeColor.text}]}>{label}</Text>
+            </View>
+
+            {index !== steps.length - 1 && (
+              <View
+                style={[
+                  styles.line,
+                  currentStep > stepNumber && styles.completedLine,
+                ]}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+}
+
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 10,
+  },
+  stepContainer: {
+    alignItems: "center",
+  },
+  circle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#e0e0e0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  completed: {
+    backgroundColor: "#4CAF50",
+  },
+  active: {
+    backgroundColor: "#ff4d6d",
+  },
+  number: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  label: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#444",
+  },
+  line: {
+    width: 60,
+    height: 3,
+    backgroundColor: "#e0e0e0",
+  },
+  completedLine: {
+    backgroundColor: "#4CAF50",
+  },
+});

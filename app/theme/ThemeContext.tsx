@@ -26,6 +26,10 @@ interface ThemeContextProps {
     toolbar: string;
     time:string; 
     borderColor: string;
+    error: string;
+    next: string;
+    previous: string;
+    placeholder: string;
   };
 }
 
@@ -59,6 +63,10 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       toolbar: theme === 'dark' ? '#121212' : '#FFFFFF',
       time: theme === 'dark' ? '#ffffff' : '#1A700D',
       borderColor: theme === 'dark' ? '#ffffff' : '#DD9C0FFF',
+      error : theme === 'dark' ? '#ae838b' : '#ff4d6d',
+      next: theme === 'dark' ? '#ff4d6d' : '#ff4d6d',
+      previous: theme === 'dark' ? '#b7b7b7' : '#0b0d06',
+      placeholder: theme === 'dark' ? '#999' : '#000000',
     };
   };
   const [themeColor, setThemeColor] = useState<any>(getThemeColor());

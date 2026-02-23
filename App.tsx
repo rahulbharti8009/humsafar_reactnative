@@ -21,7 +21,7 @@ function AppContent() {
         backgroundColor="transparent"
       />
 
-      <SafeAreaView style={[styles.container, { backgroundColor:  'transparent' }]} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor:  themeColor.statusbar }]} edges={['top', 'bottom']}>
         <MyStack />
       </SafeAreaView>
     </>
