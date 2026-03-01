@@ -9,17 +9,18 @@ type MyCircleProps = {
   size?: number;
   marginTop?:number
   style?: ViewStyle;
+  padding?:number
 };
 
-export const MyCircle = ({ children, color, size = 50, marginTop = 0, style }: MyCircleProps) => {
+export const MyCircle = ({ children, color, size = 50, marginTop = 0, style , padding = 0}: MyCircleProps) => {
   const user = useAppSelector((state) => state.auth.user)
   const { theme, toggleTheme, themeColor } = useTheme();
 
   const bgColor =
-  color || themeColor.navbar;
+  color || user?.color || themeColor.navbar;
 
   return (
-    <View style={[{width: size, height:size, borderRadius: size/2, backgroundColor: bgColor,marginTop: marginTop, justifyContent:'center', alignItems:'center'},  style,]}>
+    <View style={[{width: size, height:size, borderRadius: size/2, backgroundColor: bgColor,marginTop: marginTop, justifyContent:'center', alignItems:'center', padding: padding},  style,]}>
         {children}
     </View>
   )

@@ -10,30 +10,63 @@ import { ProfileScreen } from './ProfileScreen';
 import ProfileList from './component/ProfileList';
 import { log } from '../../utils/helper';
 import ProfileListScreen from './component/ProfileList';
+import { useDispatch } from 'react-redux';
+import { login } from '../../redux/slice/authSlice';
+import { useAppSelector } from '../../redux/hook/hook';
+import MySocket from '../../utils/socket';
 
 const tag ="DashboardScreen"
 export const DashboardScreen = () => {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [currentStep, setCurrentStep] = React.useState(1);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme , themeColor} = useTheme();
-      const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const dispatch = useDispatch();
+  const user = useAppSelector(state => state.auth.user);
+      
   
 const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
+// useEffect((): (() => void) | void => {
+//   if (!user?.mobile) return;
+//   const mobile: string = user.mobile;
+//   const socket = MySocket.getInstance().connect(mobile);
+//   try {
+//     // 🔥 CONNECT LISTENERS
+//     const handleConnect = (): void => {
+//       console.log('✅ Connected:', socket.id);
+//     };
+
+//     const handleDisconnect = (reason: string): void => {
+//       console.log('❌ Disconnected:', reason);
+//     };
+
+//     const handleConnectError = (error: Error): void => {
+//       console.log('🚨 Connection Error:', error.message);
+//     };
+
+//      if (!socket.connected) {
+//       socket.connect();
+//     }
+
+//     socket.on('connect', handleConnect);
+//     socket.on('disconnect', handleDisconnect);
+//     socket.on('connect_error', handleConnectError);
+//     // 🔥 CLEANUP
+//     return (): void => {
+//       socket.off('connect', handleConnect);
+//       socket.off('disconnect', handleDisconnect);
+//       socket.off('connect_error', handleConnectError);
+//       socket.disconnect();
+//     };
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       console.log('Unexpected error:', error.message);
+//     }
+//   }
+
+// }, [user?.mobile]);
+
   useEffect(()=> {
-      const fetchData = async () => {
-            await getLoginData().then(res => {
-              if (res) {
-                setUser(res);
-             
-              } 
-            });
-          };
-          fetchData();
-        
-  },[])
-// dependency on user
-  useEffect(()=> {
-    if(user != null){
+    if(user != null && user.isProfileActive) {        
         profileApi();
     }
   },[user])
@@ -42,7 +75,7 @@ const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
     setLoading(true)
     try{
     const payload : LoginPayload={
-      email: ''
+      email: user?.email || ""
     }
         const profile = await postApi<ProfileEntity, LoginPayload>(
         ENDPOINT.PROFILE.PROFILE_LIST,
@@ -63,14 +96,20 @@ const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
     if (user == null) return
     if (isLoading) return <Text>Loading...</Text>
 
+    const onRefresh = async () => {
+      setRefreshing(true);
+      await profileApi();  
+      setRefreshing(false);
+    };
+
     const ComponentType=()=> {
-      if (user != null && profileList.length === 0) {
+      if (user != null && !user.isProfileActive) {
         return  <ScrollView contentContainerStyle={{ padding: 10}}>
-                    <ProfileScreen/>
+                    <ProfileScreen />
                     </ScrollView> 
                 }
-
-        return  <ProfileListScreen profileList={profileList}/>
+              
+        return  <ProfileListScreen profileList={profileList} onRefresh={onRefresh} refreshing={refreshing} /> 
     }
 
   return (

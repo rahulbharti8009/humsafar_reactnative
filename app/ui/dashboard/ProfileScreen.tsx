@@ -28,7 +28,7 @@ export const ProfileScreen = () => {
       case 2:
         return <EducationDetails setCurrentStep={setCurrentStep} email={user?.email || ""} />;
       case 3:
-        return <ProfileGallery setCurrentStep={setCurrentStep} email={user?.email || ""} />;
+        return <ProfileGallery currentStep={currentStep} setCurrentStep={setCurrentStep} email={user?.email || ""} />;
       default:
         return null;
     }

@@ -30,7 +30,18 @@ interface ThemeContextProps {
     next: string;
     previous: string;
     placeholder: string;
+    chat: string;
+    tabBarBgColor: string;
+    tabBarActive: string;
+    tabBarInactive: string;
+    tabBarActiveBgColor: string;
+    chatSearch: string;
+    profileSelecter: string;
+    onlyWhite: string;
+
   };
+  notification: number;
+  setNotification: (message: number) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -66,7 +77,18 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       error : theme === 'dark' ? '#ae838b' : '#ff4d6d',
       next: theme === 'dark' ? '#ff4d6d' : '#ff4d6d',
       previous: theme === 'dark' ? '#b7b7b7' : '#0b0d06',
-      placeholder: theme === 'dark' ? '#999' : '#000000',
+      placeholder: theme === 'dark' ? '#999' : '#929191',
+      chat: theme === 'dark' ? '#DD9C0FFF' : '#DD9C0FFF',
+  
+    tabBarBgColor: theme === 'dark' ? '#121212' : '#FFFFFF',
+    tabBarActive: theme === 'dark' ? '#DD9C0FFF' : '#DD9C0FFF',
+    tabBarInactive: theme === 'dark' ? '#999999' : '#999999',
+    tabBarActiveBgColor: theme === 'dark' ? '#E6F0FF' : '#000000',
+
+    chatSearch: theme === 'dark' ? '#F2F2F7' : '#F2F2F7',
+    profileSelecter: theme === 'dark' ? '#1e1e1e' : '#F2F2F7',
+    onlyWhite: theme === 'dark' ? '#ffffff' : '#ffffff',
+
     };
   };
   const [themeColor, setThemeColor] = useState<any>(getThemeColor());
@@ -88,9 +110,10 @@ useEffect(()=> {
   const toggleTheme = () => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
+  const [notification, setNotification] = useState<number>(0);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, themeColor }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, themeColor, notification, setNotification }}>
       {children}
     </ThemeContext.Provider>
   );

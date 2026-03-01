@@ -1,8 +1,9 @@
+import { Chat, Invite } from "./auth";
 
 
 export type ProfileEntity = {
   email?: string;
-
+  requestType?: string;
   personal?: PersonalDetails;
 
   education?: string;
@@ -15,7 +16,8 @@ export type ProfileEntity = {
   profileImages?: any;
 
   gallery?: ImageEntity[];
-
+  chat?: Chat[];
+  invite?: Invite[];
   createdAt?: string;
   updatedAt?: string;
 };
@@ -24,6 +26,7 @@ export type PersonalDetails = {
   name: string;
   gender: Gender;
   dob: string; // string for RN form (YYYY-MM-DD)
+  age: string; // calculated age
   height: string;
   religion: string;
   caste: string;
@@ -33,8 +36,7 @@ export type PersonalDetails = {
 };
 
 export type ImageEntity = {
-  uri: any;
-  url: string;
+  uri: string;
 };
 
 export type Gender = "Male" | "Female" | "Other" | "";

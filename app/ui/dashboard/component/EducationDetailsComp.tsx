@@ -9,27 +9,30 @@ import {
   Alert,
 } from "react-native";
 import { useTheme } from "../../../theme/ThemeContext";
-import { getProfileData, getProfileExpData, setProfileExpData } from "../../../utils/localDB";
+import { getLoginData, getProfileData, getProfileExpData, setLoginSave, setProfileExpData } from "../../../utils/localDB";
 import { ProfileEntity } from "../../../types/profile.type";
 import { incomeList, occupationList } from "../../../utils/enum";
 import { Dropdown } from "react-native-element-dropdown";
 import { isValidEmail } from "../../../utils/helper";
 import { postApi } from "../../../types/genericType";
 import { ENDPOINT } from "../../../api/endpoint";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../../../hook/hook";
+import { login } from "../../../redux/slice/authSlice";
+import BottomSheetDropdown from "../../../bottomSheet/BottomSheetDropdown";
 
 export default function EducationDetails({ setCurrentStep, email }: any) {
     const { theme , themeColor} = useTheme();
-  
+    const dispatch = useDispatch();
+        const user = useAppSelector(state => state.auth.user);
+      
   const [form, setForm] = useState<ProfileEntity>({
     education: "",
     job: "",
     income: "",
     familyIncome: "",
   });
-  
     const [isLoading, setLoading] = useState<boolean>(false);
-  
-
   const [errors, setErrors] = useState<any>({});
   const [personal, setPersonal] = useState<any>({});
 
@@ -82,14 +85,14 @@ export default function EducationDetails({ setCurrentStep, email }: any) {
     return valid;
   };
 
-      const onProfileApi = async () => {
+      const saveProfileApi = async () => {
         if (email.trim() === '' || !isValidEmail(email)) {
             Alert.alert("Validation Error", "Email shouldn't be empty and must be valid");
             return;
           }
           try {
               const payload: ProfileEntity = {
-                email: email,
+                email: user?.email, // use email from user state
                 personal: personal,
                 education: form.education,
                 job: form.job,
@@ -105,7 +108,15 @@ export default function EducationDetails({ setCurrentStep, email }: any) {
                   payload 
                 );
                     if(res.status) {
-                      setCurrentStep(3);
+                        if (user != null) {
+                          const updatedUser = { ...user, isProfileActive: true ,name : res.value?.personal?.name || user.name, mobile: res.value?.email || user.mobile};
+                            await setLoginSave(updatedUser);
+                            // dispatch(login(updatedUser));
+                            setCurrentStep(3);
+                            Alert.alert(`${res.message || "Profile saved successfully"}`);
+                        } else {
+                          Alert.alert("Error", "User data not found");
+                        }
                     } else {
                       Alert.alert("Error", res.message);
                     }
@@ -119,8 +130,9 @@ export default function EducationDetails({ setCurrentStep, email }: any) {
 
   const onNext = () => {
     if (validate()) {
+
       setProfileExpData(form);
-      onProfileApi()
+      saveProfileApi()
     }
   };
 
@@ -131,15 +143,23 @@ export default function EducationDetails({ setCurrentStep, email }: any) {
       value={typeof form[key] === "string" || typeof form[key] === "undefined" ? form[key] as string : ""}
       placeholder={placeholder}
       placeholderTextColor={themeColor.placeholder}
-      style={[styles.input,{backgroundColor: themeColor.inputBackground}, errors[key] && { borderColor: themeColor.error}]}
-      onChangeText={(v) => setForm({ ...form, [key]: v })}
+      style={[styles.input,{backgroundColor: themeColor.inputBackground, color: themeColor.text}, errors[key] && { borderColor: themeColor.error}]}
+      onChangeText={(v) => setForm({ ...form, [key]: v.toUpperCase() })}
     />
  </>
 
   );
 
 
-
+  const renderBottomSheet = ({placeholder, key, data}: {placeholder: string; key: keyof typeof form; data?: any[]}) => (
+     <BottomSheetDropdown
+              label={placeholder}
+              placeholder={`Select your ${placeholder.toLowerCase()}`}
+              data={data || []}
+              value={form[key]}
+              onSelect={(value) => setForm({ ...form, [key]: value })}
+            />
+  )
   return (
     <ScrollView contentContainerStyle={[styles.container,{backgroundColor:themeColor.background}]}>
       <View style={[styles.card,{backgroundColor:themeColor.inputBackground}]}>
@@ -148,121 +168,25 @@ export default function EducationDetails({ setCurrentStep, email }: any) {
             {errors.job && (
             <Text style={styles.error}>{errors.job}</Text>
           )}
-    <Dropdown
-          style={[
-            styles.dropdown,{backgroundColor: themeColor.inputBackground},
-            errors.job && { borderColor:themeColor.error },
-          ]}        
-          data={occupationList}
-          labelField="label"
-          valueField="value"
-          placeholder="Select Occupation"
-          placeholderStyle={{ color: themeColor.placeholder }} 
-          value={form.job}
-          onChange={(item) => setForm({ ...form, job: item.value })}
-
-          selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-            /* 👇 DROPDOWN LIST STYLING */
-          containerStyle={{
-            backgroundColor: themeColor.inputBackground, // full dropdown bg
-            borderRadius: 10,
-          }}
-
-          itemContainerStyle={{
-            backgroundColor: themeColor.inputBackground, // male/female row bg
-            borderRadius: 10,
-          }}
-
-          itemTextStyle={{
-            color: themeColor.text,
-          }}
-
-         activeColor={themeColor.selectItem} // selected item bg
-        />
+  
+        {renderBottomSheet({placeholder: "Occupation", key: "job", data: occupationList})}
+        {renderBottomSheet({placeholder: "Income", key: "income", data: incomeList})}
+        {renderBottomSheet({placeholder: "Family Income", key: "familyIncome", data: incomeList})}
 
         {errors.income && (
             <Text style={styles.error}>{errors.income}</Text>
           )}
-               <Dropdown
-                   style={[
-                     styles.dropdown,{backgroundColor: themeColor.inputBackground},
-                     errors.gender && { borderColor:themeColor.error },
-                   ]}       
-                  searchPlaceholder="Search income..."
-                   search
-                   data={incomeList}
-                   labelField="label"
-                   valueField="value"
-                   placeholder="Select Income"
-                   placeholderStyle={{ color: themeColor.placeholder }} 
-                   value={form.income}
-                   onChange={(item) => setForm({ ...form, income: item.value })}
-         
-                   selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-                     /* 👇 DROPDOWN LIST STYLING */
-                   containerStyle={{
-                     backgroundColor: themeColor.inputBackground, // full dropdown bg
-                     borderRadius: 10,
-                   }}
-         
-                   itemContainerStyle={{
-                     backgroundColor: themeColor.inputBackground, // male/female row bg
-                     borderRadius: 10,
-                   }}
-         
-                   itemTextStyle={{
-                     color: themeColor.text,
-                   }}
-         
-                  activeColor={themeColor.selectItem} // selected item bg
-                 />
-
-
 
           {errors.familyIncome && (
             <Text style={styles.error}>{errors.familyIncome}</Text>
           )}
-          <Dropdown
-                   style={[
-                     styles.dropdown,{backgroundColor: themeColor.inputBackground},
-                     errors.gender && { borderColor:themeColor.error },
-                   ]}       
-                  searchPlaceholder="Search income..."
-                   search
-                   data={incomeList}
-                   labelField="label"
-                   valueField="value"
-                   placeholder="Select Family Income"
-                   placeholderStyle={{ color: themeColor.placeholder }} 
-                   value={form.familyIncome}
-                   onChange={(item) => setForm({ ...form, familyIncome: item.value })}
-         
-                   selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-                     /* 👇 DROPDOWN LIST STYLING */
-                   containerStyle={{
-                     backgroundColor: themeColor.inputBackground, // full dropdown bg
-                     borderRadius: 10,
-                   }}
-         
-                   itemContainerStyle={{
-                     backgroundColor: themeColor.inputBackground, // male/female row bg
-                     borderRadius: 10,
-                   }}
-         
-                   itemTextStyle={{
-                     color: themeColor.text,
-                   }}
-         
-                  activeColor={themeColor.selectItem} // selected item bg
-                 />
-
 
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <TouchableOpacity style={[styles.button,{backgroundColor:themeColor.previous}]} onPress={() => setCurrentStep(1)}>
                 <Text style={styles.buttonText}>Previous</Text>
               </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button]} onPress={onNext}>
+                <TouchableOpacity style={[styles.button,{backgroundColor:themeColor.tabBarActive}]} onPress={onNext}>
                 <Text style={[styles.buttonText]}>Next</Text>
               </TouchableOpacity>
       </View>
@@ -285,7 +209,6 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 10,
-    elevation: 4,
   },
   input: {
     borderWidth: 1,

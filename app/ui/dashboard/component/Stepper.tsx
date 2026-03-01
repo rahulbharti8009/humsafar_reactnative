@@ -7,7 +7,7 @@ type Props = {
   currentStep: number;
 };
 
-const steps = ["Personal", "Education", "Preference"];
+const steps = ["Personal", "Education", "Profile Gallery"];
 
 export default function Stepper({ currentStep }: Props) {
         const { theme , themeColor} = useTheme();
@@ -25,12 +25,15 @@ export default function Stepper({ currentStep }: Props) {
             <View style={styles.stepContainer}>
               <View
                 style={[
-                  styles.circle,{backgroundColor: themeColor.inputBackground},
+                  styles.circle,{backgroundColor: themeColor.profileSelecter},
                   isCompleted && styles.completed,
-                  isActive && styles.active,
+                  isActive && { backgroundColor: themeColor.tabBarActive },
                 ]}
               >
-                <Text style={[styles.number,{color:themeColor.text}]}>{stepNumber}</Text>
+                <Text style={[
+                   {color: themeColor.text },
+                  isCompleted && {color: themeColor.onlyWhite },
+                  isActive && {color: themeColor.text},]}>{stepNumber}</Text>
               </View>
               <Text style={[styles.label,{color:themeColor.text}]}>{label}</Text>
             </View>
@@ -56,21 +59,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    margin: 10,
+    marginTop: 10,
   },
   stepContainer: {
     alignItems: "center",
   },
   circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "#e0e0e0",
     justifyContent: "center",
     alignItems: "center",
   },
   completed: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#306432",
   },
   active: {
     backgroundColor: "#ff4d6d",

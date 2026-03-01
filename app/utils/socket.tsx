@@ -17,7 +17,7 @@ class MySocket {
     return this.instance;
   }
 
-  public createSocket(userId: string): Socket {
+  public connect(userId: string): Socket {
     if (!userId) {
       throw new Error('userId is required to create socket');
     }
@@ -38,19 +38,13 @@ class MySocket {
   }
 
 
-  public getSocket(): Socket {
-    if (!this.socket) {
-      throw new Error('Socket not initialized');
-    }
+ getSocket() {
     return this.socket;
   }
 
-  public disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-      log('socket', 'disconnected');
-    }
+  disconnect() {
+    this.socket?.disconnect();
+    this.socket = null;
   }
 }
 

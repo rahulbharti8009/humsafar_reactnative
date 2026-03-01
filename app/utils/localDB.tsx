@@ -48,3 +48,49 @@ export const saveUser = async (user: User) => {
   await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
 };
 
+// export const Religion = [
+//   { label: "Hindu", value: "Hindu" },
+//   { label: "Muslim", value: "Muslim" },
+//   { label: "Christian", value: "Christian" },
+//   { label: "Sikh", value: "Sikh" },
+//   { label: "Buddhist", value: "Buddhist" },
+//   { label: "Jain", value: "Jain" },
+//   { label: "Parsi", value: "Parsi" },
+//   { label: "Jewish", value: "Jewish" },
+//   { label: "Baháʼí", value: "Baháʼí" },
+//   { label: "Tribal", value: "Tribal" },
+// ];
+
+export const calculateAge = (dob: string) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  return `${age}`;
+};
+
+const generateHeightList = () => {
+  const heights: { label: string; value: string }[] = [];
+
+  for (let feet = 3; feet <= 7; feet++) {
+    for (let inch = 0; inch < 12; inch++) {
+      const label = `${feet} feet ${inch} inch`;
+      const value = `${feet}.${inch}`;
+      heights.push({ label, value });
+    }
+  }
+
+  return heights;
+};
+
+export const heightList = generateHeightList();

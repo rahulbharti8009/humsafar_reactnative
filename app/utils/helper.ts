@@ -4,7 +4,7 @@ export const randomColor = () => {
 
 
   const isDebug = true
-  export const log = (tag: string, token: any, ...args: any)=> {
+  export const log = (tag?: string, token?: any, ...args: any)=> {
     if(isDebug){
       console.log(tag, token, args)
     }
@@ -49,3 +49,4 @@ export const isValidEmail = (email: string) => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
+

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useTheme } from "../../../theme/ThemeContext";
 import { useFocusEffect } from "@react-navigation/native";
-import { getProfileData, getProfileExpData, setProfileExpData } from "../../../utils/localDB";
+import { getLoginData, getProfileData, getProfileExpData, setLoginSave, setProfileExpData } from "../../../utils/localDB";
 import { ProfileEntity } from "../../../types/profile.type";
 import { incomeList, occupationList } from "../../../utils/enum";
 import { Dropdown } from "react-native-element-dropdown";
@@ -20,10 +20,13 @@ import { ENDPOINT } from "../../../api/endpoint";
 import { MyCircle } from "../../../component/MyCircle";
 import { Icon } from "../../../component/ImageComp";
 import { openPicker } from "../../../utils/Camera";
+import { useDispatch } from "react-redux";
+import { login } from "../../../redux/slice/authSlice";
 
-export default function ProfileGallery({ setCurrentStep, email }: any) {
+export default function ProfileGallery({ setCurrentStep, email, currentStep }: any) {
     const { theme , themeColor} = useTheme();
     const [image, setImage] = useState<string  | null>(null);
+    const dispatch = useDispatch();
 
   const [form, setForm] = useState<ProfileEntity>({
     profileImages : [],
@@ -31,21 +34,36 @@ export default function ProfileGallery({ setCurrentStep, email }: any) {
   });
     const [isLoading, setLoading] = useState<boolean>(false);
 
-  const onNext = async() => {
-    console.log("Form Data", form.profileImages[0]);
-      await uploadProfile({
-                    email: email,
-                    profileImages: form.profileImages[0], 
-                  });
-                };
-  
+   const uoload =async () => {
+         console.log("Form Data", form.profileImages[0]);
+                         setLoading(() => true)
+    try {
+      const res =  await uploadProfile({
+                     email: email,
+                     profileImages: form.profileImages[0], 
+                     galleryImages: form.gallery?.map((item) => item.uri) // ✅ FIXED
+                   });
+                 if(res.status) {
+                   const updatedUser = await getLoginData();
+                   dispatch(login(updatedUser));
+                    Alert.alert("Profile uploaded successfully");
+                  } else {
+                    Alert.alert("Failed to upload profile");
+                  }
+                }catch(error) {
+                  }
+                  finally {
+                    setLoading(() => false)
+                  }
+                 }
+             
 
   return (
-    <ScrollView contentContainerStyle={[styles.container,{backgroundColor:themeColor.background}]}>
+    <View style={[styles.container,{backgroundColor:themeColor.background}]}>
       <View style={[styles.card,{backgroundColor:themeColor.inputBackground}]}>
+            <Text style={{color:themeColor.text, fontSize:18, fontWeight:"600", marginTop:10}}>Profile</Text>
 
-
-              <MyCircle  size={85}>
+              <MyCircle  size={60} color={themeColor.profileSelecter}>
               <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() =>
@@ -61,52 +79,85 @@ export default function ProfileGallery({ setCurrentStep, email }: any) {
                     }
                   >
                     <Icon
-                      size={80}
+                      size={40}
                       source={
                               form.profileImages && form.profileImages.length > 0
                                 ? { uri: form.profileImages[0] }
-                                : require("../../../../assets/ic_profile.png")
+                                : require("../../../../assets/ic_add.png")
                             }
                     />
               </TouchableOpacity>
                </MyCircle>
 
-               
+            <Text style={{color:themeColor.text, fontSize:18, fontWeight:"600", marginTop:10}}>Gallery</Text>
+            <View style={{flexDirection:'row'}}>
+{/* add galllary */}
+              <MyCircle  size={60} color={themeColor.profileSelecter}>
+              <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      openPicker({
+                        imageType: "gallery",
+                        callback: (_type: string, uri: string) => {
+                          setForm((prev) => ({
+                            ...prev,
+                            gallery: [...(prev.gallery || []), { uri: uri }],
+                          }));
+                        },
+                      })
+                    }
+                  >
+                    <Icon
+                      size={50}
+                      tintColor={themeColor.placeholder}
+                      source={
+                             require("../../../../assets/ic_gallery.png")
+                            }
+                    />
+              </TouchableOpacity>
+               </MyCircle>
+{/* gallary */}
+                  {form.gallery?.map((item) => (
+                                                <Icon
+                                                style={{ marginLeft: 10 }}
+                                                  key={item.uri}
+                                                  size={50}
+                                                  source={{ uri: item.uri }}
+                                                />
+                                              ))}
+            </View>
+{/* upload */}
+           
 
-           <TouchableOpacity style={[styles.button,{backgroundColor:themeColor.previous}]} onPress={() => {
-            onNext();
-           }}
-          >
-                <Text style={styles.buttonText}>Upload</Text>
-                </TouchableOpacity>
-  
-
-
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      </View>
+      {/* finish */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
               <TouchableOpacity style={[styles.button,{backgroundColor:themeColor.previous}]} onPress={() => setCurrentStep(2)}>
                 <Text style={styles.buttonText}>Previous</Text>
               </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button]} onPress={onNext}>
-                <Text style={[styles.buttonText]}>Next</Text>
-              </TouchableOpacity>
+                   <TouchableOpacity disabled={form.profileImages?.length === 0 || form.gallery?.length === 0} style={[styles.button,{backgroundColor: form.profileImages?.length === 0 || form.gallery?.length === 0 ? themeColor.tabBarInactive : themeColor.tabBarActive}]} onPress={() => {
+                  uoload();
+                }}
+                >
+                <Text style={[styles.buttonText]}>Upload</Text>
+                </TouchableOpacity>
+
       </View>
-      </View>
-    </ScrollView>
+  </View>
   );
 }
 
 
 const styles = StyleSheet.create({
   container: {
-    padding: 0,
-    backgroundColor: "#f5f7fb",
-    flexGrow: 1,
+    flex: 1,
   },
   card: {
     backgroundColor: "#fff",
     borderRadius: 15,
     padding: 18,
+    margin: 4,
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -122,7 +173,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   button: {
-    backgroundColor: "#ff4d6d",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",

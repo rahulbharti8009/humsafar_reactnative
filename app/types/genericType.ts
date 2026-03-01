@@ -1,6 +1,8 @@
 import axios, { AxiosError } from 'axios';
 import { API } from '../api/client';
 import { log } from '../utils/helper';
+import { BASE_URL } from '../utils/constant';
+import { Alert } from 'react-native';
 
 export interface ApiResponse<T> {
   status: boolean;
@@ -28,38 +30,67 @@ export const postApi = async <T, P = unknown>(
   }
 };
 
+const getFileType = (uri: string) => {
+  const extension = uri.split(".").pop()?.toLowerCase();
+
+  if (extension === "jpg" || extension === "jpeg") {
+    return "image/jpeg";
+  }
+
+  if (extension === "png") {
+    return "image/png";
+  }
+
+  return null;
+};
 export const uploadProfile = async ({
   email,
   profileImages,
   galleryImages = [],
 }: any) => {
   const formData = new FormData();
-
   formData.append("email", email);
+  const fileType = getFileType(profileImages);
+
+if (!fileType) {
+  Alert.alert("Only JPG, JPEG and PNG images are allowed");
+  return;
+}
 
   // single profile image
-  formData.append("profileImages", {
-    uri: profileImages,
-    type: "image/jpeg",
-    name: "profile.jpg",
-  } as any);
+formData.append("profileImages", {
+  uri: profileImages,
+  type: fileType,
+  name: `profile.${profileImages.split(".").pop()}`,
+});
+
+  // ✅ Gallery Images (Multiple)
+if (galleryImages?.length > 0) {
+  galleryImages.forEach((uri: string, index: number) => {
+    const fileType = getFileType(uri);
+    if (!fileType) return;
+
+    formData.append("gallery", {
+      uri: uri,
+      type: fileType,
+      name: `gallery_${index}.${uri.split(".").pop()}`,
+    });
+  });
+}
 
   try {
-  
-    
     const response = await axios.post(
-      "http://10.11.127.147:8000/api/profilePic",
+      `${BASE_URL}/profilePic`,
       formData,
       {
-        headers: {
-          // Accept: "application/json",
-          // ❌ DO NOT manually set Content-Type in React Native
+          headers: {
+          "Content-Type": "multipart/form-data",
         },
       }
     );
 
-    console.log("UPLOAD SUCCESS ✅", response.data);
+    return response.data;
   } catch (error) {
-    console.log("UPLOAD ERROR ❌", error);
+        return { status: false, message: error instanceof Error ? error.message : 'Upload failed' };
   }
 };

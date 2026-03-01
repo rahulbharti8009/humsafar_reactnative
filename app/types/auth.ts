@@ -26,7 +26,9 @@ export interface LoginPayload {
   export interface User {
     _id: string;
     email: string;
+    mobile: string;
     status : boolean
+    color?: string;
     name: string;
     chat: Chat[];
     invite: Invite[];
@@ -34,6 +36,7 @@ export interface LoginPayload {
     createdAt: string;
     updatedAt: string;
     message: string;
+    isProfileActive: boolean;
     fcmToken: string;
     __v: number;  
   }

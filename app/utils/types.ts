@@ -3,6 +3,7 @@ import { ProfileEntity } from "../types/profile.type";
 
 export type RootStackParamList = {
     Login: undefined;
+    chattab: undefined;
     Dashboard: { user: ProfileEntity };
     Otp: { email: string };
     Users:undefined;
@@ -10,6 +11,8 @@ export type RootStackParamList = {
     ChatHistory : {user: Chat};
     AddGroupUI : undefined;
     VideoCall: {}
+    Chat: undefined;
+    Invite: undefined;
   };
 
   export type ChatUser = {

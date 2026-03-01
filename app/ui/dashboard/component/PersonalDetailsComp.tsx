@@ -10,21 +10,6 @@ const casteList = [
   { label: "Vaishya", value: "Vaishya" },
 ];
 
-const stateList = [
-  { label: "Delhi", value: "Delhi" },
-  { label: "Uttar Pradesh", value: "UP" },
-];
-
-const cityData: any = {
-  Delhi: [
-    { label: "New Delhi", value: "New Delhi" },
-    { label: "Laxmi Nagar", value: "Laxmi Nagar" },
-  ],
-  UP: [
-    { label: "Agra", value: "Agra" },
-    { label: "Lucknow", value: "Lucknow" },
-  ],
-};
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -37,9 +22,13 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
 import { useTheme } from "../../../theme/ThemeContext";
-import { getProfileData, setProfileData } from "../../../utils/localDB";
+import { calculateAge, getProfileData, heightList, setProfileData } from "../../../utils/localDB";
 import type { PersonalDetails } from "../../../types/profile.type";
 import { useFocusEffect } from "@react-navigation/native";
+import BottomSheetDropdown from "../../../bottomSheet/BottomSheetDropdown";
+import { indiaStates } from "../../../utils/india";
+import RadioGroup from "../../../common/RadioGroup";
+import { Religion } from "../../../utils/data";
 
 export default function PersonalDetails({ setCurrentStep }: any) {
   const [errors, setErrors] = useState<any>({});
@@ -47,6 +36,7 @@ export default function PersonalDetails({ setCurrentStep }: any) {
     name: "",
     gender: "",
     dob: "",  
+    age: "",
     height: "",
     religion: "",
     caste: "",
@@ -91,6 +81,11 @@ export default function PersonalDetails({ setCurrentStep }: any) {
         valid = false;
       }
 
+      if (!form.age || isNaN(form.age) || form.age < 18 || form.age > 100) {
+        newErrors.age = "Enter valid age (18-100)";
+        valid = false;
+      }
+
       if (!form.height) {
         newErrors.height = "Enter height";
         valid = false;
@@ -121,6 +116,7 @@ export default function PersonalDetails({ setCurrentStep }: any) {
         newErrors.address = "Enter address";
         valid = false;
       }
+   
       setErrors(newErrors);
       return valid;
     };
@@ -131,193 +127,102 @@ export default function PersonalDetails({ setCurrentStep }: any) {
           setCurrentStep(2);
         }
       };
+const today = new Date();
 
-  const renderInput = (placeholder: string, key: keyof typeof form) => (
+// ✅ 18 years ago (latest allowed DOB)
+const maxDate = new Date(
+  today.getFullYear() - 18,
+  today.getMonth(),
+  today.getDate()
+);
+
+// ✅ 100 years ago (earliest allowed DOB)
+const minDate = new Date(
+  today.getFullYear() - 100,
+  today.getMonth(),
+  today.getDate()
+);
+
+  const renderInput = ({placeholder, key, isEditable = true}: {placeholder: string; key: keyof typeof form; isEditable?: boolean}) => (
     <TextInput
+      editable={isEditable}
       value={form[key]}
       placeholder={placeholder}
       placeholderTextColor={themeColor.placeholder}
-      style={[styles.input,{backgroundColor: themeColor.inputBackground}, errors[key] && { borderColor: themeColor.error}]}
+      style={[styles.input,{backgroundColor: themeColor.inputBackground, borderColor: themeColor.inputBorder, color: themeColor.text}, errors[key] && { borderColor: themeColor.error}]}
       onChangeText={(v) => setForm({ ...form, [key]: v })}
     />
   );
 
+  const renderBottomSheet = ({placeholder, key, data}: {placeholder: string; key: keyof typeof form; data?: any[]}) => (
+     <BottomSheetDropdown
+              label={placeholder}
+              placeholder={`Select your ${placeholder.toLowerCase()}`}
+              data={data || []}
+              value={form[key]}
+              onSelect={(value) => setForm({ ...form, [key]: value })}
+            />
+  )
   return (
     <ScrollView contentContainerStyle={[styles.container,{backgroundColor:themeColor.background}]}>
       <View style={[styles.card,{backgroundColor:themeColor.inputBackground}]}>
 
-        {renderInput("Full Name", "name")}
+        {renderInput({placeholder: "Full Name", key: "name"})}
 
-        <Dropdown
-          style={[
-            styles.dropdown,{backgroundColor: themeColor.inputBackground},
-            errors.gender && { borderColor:themeColor.error },
-          ]}        
-          
-          data={genderList}
-          labelField="label"
-          valueField="value"
-          placeholder="Select Gender"
-          placeholderStyle={{ color: themeColor.placeholder }} 
+        <RadioGroup
+          label="Gender"
+          options={genderList}
           value={form.gender}
-          onChange={(item) => setForm({ ...form, gender: item.value })}
-
-          selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-            /* 👇 DROPDOWN LIST STYLING */
-          containerStyle={{
-            backgroundColor: themeColor.inputBackground, // full dropdown bg
-            borderRadius: 10,
-          }}
-
-          itemContainerStyle={{
-            backgroundColor: themeColor.inputBackground, // male/female row bg
-            borderRadius: 10,
-          }}
-
-          itemTextStyle={{
-            color: themeColor.text,
-          }}
-
-         activeColor={themeColor.selectItem} // selected item bg
+          onChange={(val) => setForm({ ...form, gender: val as any })}
+          error={!!errors.gender}
+          themeColor={themeColor}
         />
+       
         {errors.gender && <Text style={styles.error}>{errors.gender}</Text>}
 
         {/* DOB */}
         <TouchableOpacity
- style={[
-    styles.input,{backgroundColor: themeColor.inputBackground,},
-    errors.dob && { borderColor: themeColor.error },
-  ]}          onPress={() => setShowPicker(true)}
+        style={[
+            styles.input,{backgroundColor: themeColor.inputBackground, borderColor: themeColor.inputBorder, color: themeColor.text},
+            errors.dob && { borderColor: themeColor.error },
+          ]}  
+          onPress={() => setShowPicker(true)}
         >
-          <Text style={{ color: form.dob ? themeColor.text : "#999" }}>
+          <Text style={{ color: form.dob ? themeColor.text : themeColor.placeholder }}>
             {form.dob || "Select Date of Birth"}
           </Text>
         </TouchableOpacity>
-{errors.dob && <Text style={styles.error}>{errors.dob}</Text>}
+        {errors.dob && <Text style={styles.error}>{errors.dob}</Text>}
 
         {showPicker && (
           <DateTimePicker
             mode="date"
-            value={new Date()}
+            value={form.dob ? new Date(form.dob) : maxDate}
+            minimumDate={minDate}
+            maximumDate={maxDate}
+            themeVariant={theme == "dark" ? "dark" : "light"}
             onChange={(event, date) => {
               setShowPicker(false);
               setForm({
                 ...form,
                 dob: date?.toISOString().split("T")[0] || "",
+                age: calculateAge(date?.toISOString().split("T")[0] || ""),
               });
             }}
           />
         )}
 
-        {renderInput("Height (e.g. 5.8)", "height")}
-        {renderInput("Religion", "religion")}
-
-        <Dropdown
-          style={[
-            styles.dropdown,{backgroundColor: themeColor.inputBackground},
-            errors.caste && { borderColor:themeColor.error },
-          ]}  
-          data={casteList}
-          labelField="label"
-          valueField="value"
-          placeholder="Select Caste"
-                    placeholderStyle={{ color: themeColor.placeholder }} 
-
-          value={form.caste}
-          onChange={(item) => setForm({ ...form, caste: item.value })}
-          selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-            /* 👇 DROPDOWN LIST STYLING */
-          containerStyle={{
-            backgroundColor: themeColor.inputBackground, // full dropdown bg
-            borderRadius: 10,
-          }}
-
-          itemContainerStyle={{
-            backgroundColor: themeColor.inputBackground, // male/female row bg
-            borderRadius: 10,
-          }}
-
-          itemTextStyle={{
-            color: themeColor.text,
-          }}
-
-         activeColor={themeColor.selectItem} // selected item bg
-        />
-
-        <Dropdown
-          style={[
-                      styles.dropdown,{backgroundColor: themeColor.inputBackground},
-                      errors.state && { borderColor: themeColor.error },
-                    ]} 
-          data={stateList}
-          labelField="label"
-          valueField="value"
-          placeholder="Select State"
-                    placeholderStyle={{ color: themeColor.placeholder }} 
-
-          value={form.state}
-          onChange={(item) => {
-            setForm({ ...form, state: item.value, city: "" });
-            setCities(cityData[item.value]);
-          }}
-
-          selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-            /* 👇 DROPDOWN LIST STYLING */
-          containerStyle={{
-            backgroundColor: themeColor.inputBackground, // full dropdown bg
-            borderRadius: 10,
-          }}
-
-          itemContainerStyle={{
-            backgroundColor: themeColor.inputBackground, // male/female row bg
-            borderRadius: 10,
-          }}
-
-          itemTextStyle={{
-            color: themeColor.text,
-          }}
-
-         activeColor={themeColor.selectItem} // selected item bg
-        />
-
-        <Dropdown
-        style={[
-                    styles.dropdown,{backgroundColor: themeColor.inputBackground},
-                    errors.city && { borderColor: themeColor.error},
-                  ]}  
-          data={cities}
-          labelField="label"
-          valueField="value"
-          placeholder="Select City"
-                    placeholderStyle={{ color: themeColor.placeholder }} 
-
-          value={form.city}
-          onChange={(item) => setForm({ ...form, city: item.value })}
-
-          selectedTextStyle={{ color: themeColor.text, fontWeight: '600' }}
-            /* 👇 DROPDOWN LIST STYLING */
-          containerStyle={{
-            backgroundColor: themeColor.inputBackground, // full dropdown bg
-            borderRadius: 10,
-          }}
-
-          itemContainerStyle={{
-            backgroundColor: themeColor.inputBackground, // male/female row bg
-            borderRadius: 10,
-          }}
-
-          itemTextStyle={{
-            color: themeColor.text,
-          }}
-
-         activeColor={themeColor.selectItem} // selected item bg
-        />
-
-        {renderInput("Address", "address")}
+        {renderInput({placeholder: "Age", key: "age", isEditable: false})}
+        {renderBottomSheet({placeholder: "Height", key: "height", data: heightList})}
+        {renderBottomSheet({placeholder: "Religion", key: "religion", data: Religion})}
+        {renderBottomSheet({placeholder: "Caste", key: "caste", data: form.religion ? Religion.filter(r => r.value === form.religion)[0]?.castes.map((c: any) => ({label: c.label, value: c.value})) : []})}
+        {renderBottomSheet({placeholder: "State", key: "state", data: indiaStates})}
+        {renderBottomSheet({placeholder: "City", key: "city", data: form.state != "" ? indiaStates.filter(s => s.value === form.state)[0]?.cities.map((c: string) => ({label: c, value: c})) : []})}
+        {renderInput({placeholder: "Address", key:  "address"})}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={[styles.button,{backgroundColor:themeColor.next}]} onPress={onNext}>
+        <TouchableOpacity style={[styles.button,{backgroundColor:themeColor.tabBarActive}]} onPress={onNext}>
           <Text style={[styles.buttonText, {color:themeColor.button_text_color}]}>Next</Text>
         </TouchableOpacity>
       </View>
@@ -338,22 +243,18 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 card: {
-  backgroundColor: "#fff",
   borderRadius: 15,
   padding: 18,
-  shadowColor: "#000",
   shadowOpacity: 0.08,
   shadowRadius: 10,
-  elevation: 4,
 },
   input: {
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderWidth: 0.5,
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
     marginBottom: 14,
-    backgroundColor: "#fafafa",
+    borderColor: "#ccc",
   },
   dropdown: {
     borderWidth: 1,

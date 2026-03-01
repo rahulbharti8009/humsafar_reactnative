@@ -1,8 +1,8 @@
 import React from 'react';
-import { Image, ImageStyle, StyleProp } from 'react-native';
+import { Image, ImageSourcePropType, ImageStyle, StyleProp } from 'react-native';
 
 interface IconProps {
-  source: number;
+  source: ImageSourcePropType;
   size?: number;
   radius?: number;
   padding?:number;
@@ -33,7 +33,8 @@ export const Icon: React.FC<IconProps> = ({
           tintColor,
           borderRadius: size/2,
           borderWidth: borderWidth,
-          padding:padding
+          padding:padding,
+          margin
         },
         style,
       ]}

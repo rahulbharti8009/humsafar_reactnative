@@ -12,6 +12,11 @@ import { OtpScreen } from '../ui/auth/OtpScreen';
 import { DashboardScreen } from '../ui/dashboard/DashboardScreen';
 import { useTheme } from '../theme/ThemeContext';
 import AppHeader from '../component/AppHeader';
+import { BottomTabs } from '../bottomTab/BottomTabs';
+import { ChatTab } from '../bottomTab/ChatTab';
+import ChatHistoryUI from '../ui/chat/ChatHistory';
+import { InviteListScreen } from '../ui/chat/InviteList';
+import { ChatListScreen } from '../ui/chat/ChatList';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +49,7 @@ export const MyStack = () => {
       initialRouteName={user != null ? RouteName.Dashboard : RouteName.Login}
     >
       <Stack.Screen name={RouteName.Login} component={LoginScreen} />
+
       <Stack.Screen name={RouteName.Profile} component={ProfileScreen}  
            options={({ navigation }) => ({
             headerShown: true,
@@ -56,18 +62,22 @@ export const MyStack = () => {
             ),
           })}
   />
-            <Stack.Screen name={RouteName.Dashboard} component={DashboardScreen}   options={({ navigation }) => ({
+     <Stack.Screen name={RouteName.Dashboard} component={BottomTabs}   options={({ navigation }) => ({
          headerShown: true,
-        header: () => (
-              <AppHeader
-                title="Dashboard"
-                onMenuPress={() => navigation.openDrawer()}
-                onProfilePress={() => alert("Profile")}
-              />
-            ),
+          header: () => (
+                <AppHeader
+                  title={`${user?.name.substring(0,1).toUpperCase()}${user?.name.substring(1).toLowerCase() || user?.mobile || "Home"}`}
+                  onMenuPress={() => navigation.openDrawer()}
+                  onProfilePress={() => alert("Profile")}
+                />
+              ),
           })}/>
 
       <Stack.Screen name={RouteName.Otp} component={OtpScreen} />
+      <Stack.Screen name={RouteName.ChatTab} component={ChatTab} />
+      <Stack.Screen name={RouteName.ChatHistory} component={ChatHistoryUI} />
+      <Stack.Screen name={RouteName.Invite} component={InviteListScreen} />
+      <Stack.Screen name={RouteName.Chat} component={ChatListScreen} />
 
     </Stack.Navigator>
     </NavigationContainer>

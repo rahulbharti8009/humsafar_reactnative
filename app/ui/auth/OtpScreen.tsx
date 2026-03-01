@@ -126,7 +126,7 @@ const handleChange = (text: string, index: number) => {
        
           try {
               const payload: LoginPayload = {
-                  email: email
+                  email: email.toLowerCase()
                 };
                 setLoading(prev => prev = true)
                 const res = await postApi<User, LoginPayload>(
@@ -149,7 +149,7 @@ const handleChange = (text: string, index: number) => {
       const onVerify = async () => {
         try {
             const payload: LoginPayload = {
-                email: email,
+                email: email.trim().toLowerCase(),
                 otp: otp.join('')
               };
               setLoading(prev => prev = true)
@@ -160,8 +160,16 @@ const handleChange = (text: string, index: number) => {
                   if(res.status) {
                           // Alert.alert("success", res.message);
                         await setLoginSave(res.value!);
-                         navigation.navigate(RouteName.Dashboard, { user: res.value! });
-                  } else {
+                              navigation.reset({
+                                index: 0,
+                                routes: [
+                                  {
+                                    name: RouteName.Dashboard,
+                                    params: { user: res.value! },
+                                  },
+                                ],
+                              });  
+                            } else {
                     Alert.alert("Error", res.message);
                   }
             } catch (error) {
