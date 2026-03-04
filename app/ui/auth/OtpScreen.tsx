@@ -190,7 +190,7 @@ const handleChange = (text: string, index: number) => {
            <TextInput
           key={index}
           ref={ref => (inputs.current[index] = ref!)}
-          style={styles.input}
+          style={[styles.input]}
           keyboardType="number-pad"
           maxLength={1}
           value={digit}

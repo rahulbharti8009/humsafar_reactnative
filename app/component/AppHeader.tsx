@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { Icon } from "./ImageComp";
+import { MyCircle } from "./MyCircle";
 
 export default function AppHeader({
   title,
@@ -21,9 +22,18 @@ export default function AppHeader({
       <StatusBar barStyle="light-content" />
 
       {/* LEFT ICON */}
-      {/* <TouchableOpacity onPress={onMenuPress}>
-        <Icon name="menu" size={26} color="#fff" />
-      </TouchableOpacity> */}
+  <MyCircle  size={40} color={themeColor.profileSelecter}>
+              <TouchableOpacity
+                    activeOpacity={0.7}
+                   
+                  >
+                    <Icon
+                      size={35}
+                      source={ require("../../assets/ic_user.png")
+                            }
+                    />
+              </TouchableOpacity>
+               </MyCircle>
 
       {/* TITLE */}
       <Text style={styles.title}>{title}</Text>

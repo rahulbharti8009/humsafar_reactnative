@@ -8,6 +8,7 @@ export interface ApiResponse<T> {
   status: boolean;
   message: string;
   value?: T;
+  hasMore?: boolean;
 }
 
 export const postApi = async <T, P = unknown>(

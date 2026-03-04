@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Button,
   FlatList,
@@ -42,6 +43,10 @@ const ChatHistoryUI = () => {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const { theme, toggleTheme, themeColor } = useTheme();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
+const [page, setPage] = useState(1);
+const [hasMore, setHasMore] = useState(true);
+const [loading, setLoading] = useState(false);
+const [autoSctoll, setAutoSctoll] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -53,23 +58,37 @@ const ChatHistoryUI = () => {
   );
 
     /* ---------------- LOAD CHAT HISTORY ---------------- */
-  const handleChatHistory = async () => {
+  const handleChatHistory = async (pageNumber = 1) => {
+      if (loading || !hasMore) return;
+  setLoading(true);
+
     try {
       const payload: ChatHistoryPayload = {
         name: `${auth?.mobile}-${user.mobile}`,
+         page: pageNumber,
+        limit: 20,
       };
       const data = await postApi<ChatMessage[], ChatHistoryPayload>(
         ENDPOINT.CHAT.CHAT_HISTORY,
         payload
       );
 
-          if(data.status){
-            setChat(() =>  data.value || []);
-          } 
-        
-    } catch (error) {
-      console.log(error);
+        if (data.status) {
+      if (pageNumber === 1) {
+        setChat(data.value || []);
+      } else {
+        // prepend older messages
+      setChat(prev => [...(data.value || []), ...prev]);      }
+
+      setHasMore(data.hasMore || false);
+      setPage(pageNumber);
     }
+
+          } catch (error) {
+          console.log(error);
+        } finally {
+          setLoading(false);
+        }
   };
   /* ---------------- UNREAD / ONLINE STATUS ---------------- */
 
@@ -90,11 +109,16 @@ const ChatHistoryUI = () => {
     /* ---------------- SOCKET LISTENERS ---------------- */
 
   useEffect(() => {
-    handleChatHistory();
+    handleChatHistory(1);
     const socketParams = `message${ user.mobile ==  undefined ? `${user?.name.toString()}-${user?.name.toString()}`: `${auth?.mobile}-${user.mobile.toString()}`}`;
     socket?.on(socketParams, (msg: ChatMessage) => {
       console.log('useEffect socket ', msg);
-      setChat(prev => [...prev, msg]);
+    setChat(prev => [...prev, msg]); // because inverted
+    setIsAtBottom(true);
+    // flatListRef.current?.scrollToOffset({
+    //   offset: 0,
+    //   animated: true,
+    // });
         // chat list
       socket.emit('getchatList', {
         mobile : user.mobile
@@ -147,30 +171,43 @@ const ChatHistoryUI = () => {
     /* ---------------- AUTO SCROLL TO BOTTOM ---------------- */
 
     useEffect(() => {
-      if (chat.length > 0) {
-        setTimeout(() => {
+     
+      if (isAtBottom) {
           flatListRef.current?.scrollToEnd({
             animated: true,
           });
-        }, 100);
       }
     }, [chat]);
 
+const [isAtBottom, setIsAtBottom] = useState(true);
+const lastOffset = useRef(0);
 
   return (
-    <View style={{ backgroundColor: themeColor.background   , width:'100%', height: '100%'}}>
+    <KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  // keyboardVerticalOffset={20}
+>
+    <View style={{ backgroundColor: themeColor.background   , flex: 1}}>
           <CustomChattingHeader
         title={`${user.mobile}`} online={isRecieverUnread ? 'online': 'offline'}
       />
           <FlatList
               ref={flatListRef} 
               data={chat}
-              style={{padding: 10}}
-              onContentSizeChange={() =>
-                flatListRef.current?.scrollToEnd({ animated: true })
-              }
+              style={{ flex: 1, padding: 10 }}
+              onStartReached={() => {
+                console.log('start reached');
+                if (hasMore && !loading && chat.length >= 20) {
+                  handleChatHistory(page + 1);
+                }
+              }}
+              onStartReachedThreshold={0}
+              ListHeaderComponent={
+                    loading ? <ActivityIndicator size="small" /> : null
+                  }
               keyExtractor={(_, index) => index.toString()}
-                           ListEmptyComponent={<NoDataFound />}
+              ListEmptyComponent={<NoDataFound />}
               renderItem={({ item, index }) => (
                 <>
                   {(index === 0 || item.date !== chat[index - 1]?.date) && (
@@ -214,10 +251,25 @@ const ChatHistoryUI = () => {
                   </View>
                 </>
               )}
+
+                onScroll={(event) => {
+                      const currentOffset = event.nativeEvent.contentOffset.y;
+
+                      if (currentOffset > lastOffset.current) {
+                        console.log("Scrolling DOWN");
+                      } else {
+                        console.log("Scrolling UP");
+                        setIsAtBottom(false);
+                      }
+                      lastOffset.current = currentOffset;
+                    }}
+                    scrollEventThrottle={16}
             />
  
           <View
   style={{
+        bottom: 0,
+
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: themeColor.background,
@@ -225,6 +277,7 @@ const ChatHistoryUI = () => {
 >
     <View
       style={{
+         padding: 10,
         flexDirection: 'row',
         alignItems: 'flex-end',
         backgroundColor: themeColor.chatSearch,
@@ -278,6 +331,7 @@ const ChatHistoryUI = () => {
     </View>
 </View>
     </View>
+ </KeyboardAvoidingView>
   );
 };
 

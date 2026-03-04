@@ -65,42 +65,22 @@ const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
 
 // }, [user?.mobile]);
 
-  useEffect(()=> {
-    if(user != null && user.isProfileActive) {        
-        profileApi();
-    }
-  },[user])
+  // useEffect(()=> {
+  //   if(user != null && user.isProfileActive) {        
+  //       profileApi();
+  //   }
+  // },[user])
 
-  const profileApi =async()=> {
-    setLoading(true)
-    try{
-    const payload : LoginPayload={
-      email: user?.email || ""
-    }
-        const profile = await postApi<ProfileEntity, LoginPayload>(
-        ENDPOINT.PROFILE.PROFILE_LIST,
-        payload 
-        );
 
-        if(profile.status && profile.value){
-           setProfileList(Array.isArray(profile.value) ? profile.value : [profile.value])
-        }
-    }catch(error){
-      log(tag, error)
-    } finally{
-      setLoading(false)
-    }
-
-  }
 
     if (user == null) return
     if (isLoading) return <Text>Loading...</Text>
 
-    const onRefresh = async () => {
-      setRefreshing(true);
-      await profileApi();  
-      setRefreshing(false);
-    };
+    // const onRefresh = async () => {
+    //   setRefreshing(true);
+    //   await profileApi();  
+    //   setRefreshing(false);
+    // };
 
     const ComponentType=()=> {
       if (user != null && !user.isProfileActive) {
@@ -109,7 +89,7 @@ const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
                     </ScrollView> 
                 }
               
-        return  <ProfileListScreen profileList={profileList} onRefresh={onRefresh} refreshing={refreshing} /> 
+        return  <ProfileListScreen /> 
     }
 
   return (

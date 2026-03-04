@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import MySocket from "../../../utils/socket";
 import { useAppSelector } from "../../../hook/hook";
 import { postApi } from "../../../types/genericType";
 import { ENDPOINT } from "../../../api/endpoint";
-import { User } from "../../../types/auth";
+import { LoginPayload, User } from "../../../types/auth";
 import { useTheme } from "../../../theme/ThemeContext";
 import NoDataFound from "../../../common/NoDataFound";
 import { MyCircle } from "../../../component/MyCircle";
@@ -26,6 +26,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../utils/types";
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from "../../../component/ImageComp";
+import { log } from "../../../utils/helper";
 
 const data = [
   {
@@ -110,22 +111,23 @@ const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, onPress:
             style={styles.overlay}
           >
               {
-            item.gallery && item.gallery?.length > 0 && <TouchableOpacity onPress={inviteUserApi}  style={[styles.request,{position:'absolute', right: 10, top: 10}]}  activeOpacity={0.7}>
+            item.gallery && item.gallery?.length > 0 && <TouchableOpacity onPress={()=> {
+                
+            }}  style={[styles.request,{position:'absolute', right: 10, top: 10}]}  activeOpacity={0.7}>
              <Text style={[styles.mobile, {color: themeColor.text}]}>{`Gallery ${item.gallery?.length}`}</Text>
             </TouchableOpacity> 
           }
             <View style={{ padding: 12}}>
                  <Text style={styles.name}>
-            {item.personal?.name}, {item.personal?.age} {item.personal?.gender}
+            {item.personal?.name} • {item.personal?.age}
           </Text>
 
           <Text style={styles.details}>
-            {item.job} • {item.education} • {item.personal?.city}
+            {item.job} • {item.education} • {item.personal?.city} • {item.personal?.state} • India
           </Text>
 
           <Text style={styles.tags}>
-            {item.personal?.height} ft | {item.personal?.religion} |{" "}
-            {item.personal?.caste}
+            {item.personal?.height} ft | {item.personal?.religion} | {item.personal?.caste}
           </Text>
 
           <Text style={styles.income}>{`Income ${item.income} `}</Text>
@@ -142,9 +144,9 @@ const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, onPress:
           }
   
             {
-            requestType === 'accepted' && <TouchableOpacity onPress={onPress}  style={[{position:'absolute', right: 0, bottom: 10}]}  activeOpacity={0.7}>
+            requestType === 'accepted' && <TouchableOpacity onPress={onPress}  style={[{position:'absolute', right: 0, bottom: 0}]}  activeOpacity={0.7}>
                                             <Icon
-                                              size={50}
+                                              size={40}
                                               tintColor={themeColor.chat}
                                               margin={10}
                                               source={
@@ -165,10 +167,64 @@ export type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, RouteName.ChatTab>;
 };
 
-export default function ProfileListScreen({profileList ,onRefresh , refreshing }: {profileList: ProfileEntity[] , refreshing: boolean, onRefresh: () => void }) {
+export default function ProfileListScreen() {
  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const user = useAppSelector((state) => state.auth.user)
+  //
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
 
+    useEffect(()=> {
+    if(user != null && user.isProfileActive) {        
+        profileApi();
+    }
+  },[user])
+
+  const profileApi =async()=> {
+    if (loadingMore || !hasMore) return;
+    setLoading(true)
+    try{
+    const payload : LoginPayload={
+      email: user?.email || "",
+      page: page + 1,
+      limit: 10,
+    }
+        const profile = await postApi<ProfileEntity, LoginPayload>(
+        ENDPOINT.PROFILE.PROFILE_LIST,
+        payload 
+        );
+
+        if(profile.status && profile.value) {
+          if(page === 1) {
+            setProfileList(Array.isArray(profile.value) ? profile.value : [profile.value])
+          } else {
+            setProfileList(prev => [...prev, ...(Array.isArray(profile.value) ? profile.value : [profile.value])])
+          }
+          setHasMore(profile.hasMore || false)
+          setPage(prev => prev + 1);
+        }
+    } catch(error) {
+    } finally{
+      setLoading(false)
+    }
+
+  }
+
+    if (user == null) return
+    if (isLoading) return <Text>Loading...</Text>
+
+
+    const onRefresh = async () => {
+      setPage(1);
+      setHasMore(true);
+      setRefreshing(true);
+      await profileApi();  
+      setRefreshing(false);
+    };
   return (
       <FlatList
         style={{margin: 10}}

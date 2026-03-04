@@ -2,6 +2,8 @@
 export interface LoginPayload {
     email: string;
     otp?: string;
+    page?: number;
+    limit?: number;  
   }
   
   export interface Chat {

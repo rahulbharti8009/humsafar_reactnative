@@ -64,7 +64,7 @@ export const ChatListScreen: React.FC<Props> = ({ navigation }) => {
          <FlatList
               style={{ backgroundColor: themeColor.background }}
               data={chatList}
-              keyExtractor={item => item.mobile}
+              keyExtractor={item => item.time}
               renderItem={({ item }) => (
                 <ChatListItem
                   mobile={user?.mobile}
@@ -92,6 +92,7 @@ export const ChatListScreen: React.FC<Props> = ({ navigation }) => {
                contentContainerStyle={{
                 paddingVertical: Platform.OS === "ios" ? 40 : 20,
               }}
+                ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                 refreshing={refreshing}   
                 onRefresh={onRefresh}  
                 ListEmptyComponent={<NoDataFound title={refreshing ? 'Loading...' : 'No Chat Found'} />}

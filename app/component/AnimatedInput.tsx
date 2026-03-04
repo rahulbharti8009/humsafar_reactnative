@@ -49,7 +49,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
       <TextInput
         value={value}
         placeholder={placeholder}
-        placeholderTextColor={'#a4a4a4'}
+        placeholderTextColor={themeColor.placeholder}
         editable={!disabled}
         onFocus={() => setIsFocused(isFocused => !isFocused)}
         onBlur={() => setIsFocused(false)}

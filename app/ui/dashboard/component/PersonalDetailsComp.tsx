@@ -18,6 +18,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dropdown } from "react-native-element-dropdown";
@@ -128,21 +130,18 @@ export default function PersonalDetails({ setCurrentStep }: any) {
         }
       };
 const today = new Date();
-
 // ✅ 18 years ago (latest allowed DOB)
 const maxDate = new Date(
   today.getFullYear() - 18,
   today.getMonth(),
   today.getDate()
 );
-
 // ✅ 100 years ago (earliest allowed DOB)
 const minDate = new Date(
   today.getFullYear() - 100,
   today.getMonth(),
   today.getDate()
 );
-
   const renderInput = ({placeholder, key, isEditable = true}: {placeholder: string; key: keyof typeof form; isEditable?: boolean}) => (
     <TextInput
       editable={isEditable}
@@ -164,7 +163,11 @@ const minDate = new Date(
             />
   )
   return (
-    <ScrollView contentContainerStyle={[styles.container,{backgroundColor:themeColor.background}]}>
+    <KeyboardAvoidingView
+ style={{ flex: 1 }}  contentContainerStyle={{ flexGrow: 1 }}
+  behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+    <ScrollView contentContainerStyle={[styles.container,{backgroundColor:themeColor.background}]}  keyboardShouldPersistTaps="handled">
       <View style={[styles.card,{backgroundColor:themeColor.inputBackground}]}>
 
         {renderInput({placeholder: "Full Name", key: "name"})}
@@ -227,6 +230,7 @@ const minDate = new Date(
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
