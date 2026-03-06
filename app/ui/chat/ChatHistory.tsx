@@ -24,6 +24,7 @@ import { ChatHistoryPayload, ChatMessage, RootStackParamList } from '../../utils
 import CustomChattingHeader from '../../component/CustomChattingHeader';
 import { ENDPOINT } from '../../api/endpoint';
 import NoDataFound from '../../common/NoDataFound';
+import { log } from '../../utils/helper';
 
 type ChatRouteProp = RouteProp<
   RootStackParamList,
@@ -43,28 +44,25 @@ const ChatHistoryUI = () => {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const { theme, toggleTheme, themeColor } = useTheme();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
-const [page, setPage] = useState(1);
-const [hasMore, setHasMore] = useState(true);
-const [loading, setLoading] = useState(false);
-const [autoSctoll, setAutoSctoll] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log('Component B is focused again');
-      return () => {
-        console.log('Component B lost focus');
-      };
-    }, [])
-  );
+
+
+  const paginationRef = useRef(false);
 
     /* ---------------- LOAD CHAT HISTORY ---------------- */
   const handleChatHistory = async (pageNumber = 1) => {
-      if (loading || !hasMore) return;
+  if (isLoading || !hasMore || paginationRef.current) return;
+      paginationRef.current = true;
+
   setLoading(true);
 
     try {
       const payload: ChatHistoryPayload = {
-        name: `${auth?.mobile}-${user.mobile}`,
+        name: `${auth?.email}-${user?.email}`,
          page: pageNumber,
         limit: 20,
       };
@@ -77,7 +75,6 @@ const [autoSctoll, setAutoSctoll] = useState(true);
       if (pageNumber === 1) {
         setChat(data.value || []);
       } else {
-        // prepend older messages
       setChat(prev => [...(data.value || []), ...prev]);      }
 
       setHasMore(data.hasMore || false);
@@ -87,6 +84,7 @@ const [autoSctoll, setAutoSctoll] = useState(true);
           } catch (error) {
           console.log(error);
         } finally {
+          paginationRef.current = false;  // ✅ unlock
           setLoading(false);
         }
   };
@@ -94,8 +92,8 @@ const [autoSctoll, setAutoSctoll] = useState(true);
 
   const checkIsUnread=()=> {
     socket?.emit(`unread`, {
-      sender : auth?.mobile,
-      reciever : user.mobile,
+      sender : auth?.email,
+      reciever : user.email,
       isUnread: true
     });
   }
@@ -110,18 +108,12 @@ const [autoSctoll, setAutoSctoll] = useState(true);
 
   useEffect(() => {
     handleChatHistory(1);
-    const socketParams = `message${ user.mobile ==  undefined ? `${user?.name.toString()}-${user?.name.toString()}`: `${auth?.mobile}-${user.mobile.toString()}`}`;
+    const socketParams = `message${auth?.email}-${user.email}`;
+
     socket?.on(socketParams, (msg: ChatMessage) => {
-      console.log('useEffect socket ', msg);
     setChat(prev => [...prev, msg]); // because inverted
-    setIsAtBottom(true);
-    // flatListRef.current?.scrollToOffset({
-    //   offset: 0,
-    //   animated: true,
-    // });
-        // chat list
       socket.emit('getchatList', {
-        mobile : user.mobile
+        email : user.email
       });
     });
 // ======= unread =======
@@ -134,33 +126,20 @@ const [autoSctoll, setAutoSctoll] = useState(true);
     
     return () => {
       socket?.off(socketParams);
-      socket?.off(`unread${user.mobile}`)
+      socket?.off(`unread${user?.email}`)
     };
-  }, [user.mobile]);
+  }, [user.email]);
 
     /* ---------------- SEND MESSAGE ---------------- */
 
   const sendMessage = () => {
-    if (!auth?.mobile || !message.trim()) return;
+    if (!auth?.email || !message.trim()) return;
 
-    const t = new Date();
-    const date = `${t.getDate()}/${t.getMonth() + 1}/${t.getFullYear()}`;
-
-    let hours = t.getHours();
-    const minutes = t.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const time = `${hours}:${minutes} ${ampm}`;
-// Alert.alert(`${user.mobile}`,`${JSON.stringify(user)}`)
     const body: ChatMessage = {
       message: message.trim(),
-      from: auth?.mobile.toString(),
-      clientFrom: auth?.mobile,
-      clientTo: user.mobile,
-      date: date,
-      time: time,
+      clientFrom: auth?.email,
+      clientTo: user?.email,
       isUnread:isRecieverUnread,
-      fcmToken: '',
     };
 
     socket?.emit('user-message', body);
@@ -170,17 +149,15 @@ const [autoSctoll, setAutoSctoll] = useState(true);
 
     /* ---------------- AUTO SCROLL TO BOTTOM ---------------- */
 
-    useEffect(() => {
+    // useEffect(() => {
      
-      if (isAtBottom) {
-          flatListRef.current?.scrollToEnd({
-            animated: true,
-          });
-      }
-    }, [chat]);
+    //   if (isAtBottom) {
+    //       flatListRef.current?.scrollToEnd({
+    //         animated: true,
+    //       });
+    //   }
+    // }, [chat]);
 
-const [isAtBottom, setIsAtBottom] = useState(true);
-const lastOffset = useRef(0);
 
   return (
     <KeyboardAvoidingView
@@ -190,21 +167,49 @@ const lastOffset = useRef(0);
 >
     <View style={{ backgroundColor: themeColor.background   , flex: 1}}>
           <CustomChattingHeader
-        title={`${user.mobile}`} online={isRecieverUnread ? 'online': 'offline'}
+        title={`${user?.email}`} name={`${user?.name}`} online={isRecieverUnread ? 'online': 'offline'}
       />
           <FlatList
               ref={flatListRef} 
               data={chat}
               style={{ flex: 1, padding: 10 }}
-              onStartReached={() => {
-                console.log('start reached');
-                if (hasMore && !loading && chat.length >= 20) {
-                  handleChatHistory(page + 1);
+            //  onScroll={(event) => {
+            //         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+
+            //         const isBottom =
+            //           layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+
+            //         const isTop = contentOffset.y <= 50;
+
+            //         setIsAtBottom(isBottom);
+
+            //         if (isTop && !isLoading && hasMore && !paginationRef.current) {
+            //           handleChatHistory(page + 1);
+            //         }
+            //       }}
+            //  scrollEventThrottle={16}
+
+              onContentSizeChange={() => {
+                log("","onContentSizeChange")
+                if (isAtBottom) {
+                  flatListRef.current?.scrollToEnd({ animated: true });
                 }
               }}
-              onStartReachedThreshold={0}
+              
+              showsVerticalScrollIndicator={false}
+              // PAGGINATION
+              onStartReached={() => {
+              console.log('start reached');
+               if(isAtBottom) return
+
+              if (!isLoading && hasMore && !paginationRef.current && chat.length >= 20) {
+                  handleChatHistory(page + 1);
+                } 
+              }}
+              onStartReachedThreshold={0.3}
+              // LOADING HEADER
               ListHeaderComponent={
-                    loading ? <ActivityIndicator size="small" /> : null
+                    isLoading ? <ActivityIndicator size="small" /> : null
                   }
               keyExtractor={(_, index) => index.toString()}
               ListEmptyComponent={<NoDataFound />}
@@ -229,16 +234,17 @@ const lastOffset = useRef(0);
                       {item.date}
                     </Text>
                   )}
+
                   <View
                     style={{
                       alignSelf:
-                        item.from === auth?.mobile
+                        item.clientFrom === auth?.email
                           ? 'flex-end'
                           : 'flex-start',
                       backgroundColor:
-                        item.from === auth?.mobile ? '#d1d1d1' : '#add8e6',
-                      marginStart: item.from === auth?.mobile ? 40 : 5,
-                      marginEnd: item.from === auth?.mobile ? 5 : 40,
+                      item.clientFrom === auth?.email ? '#d1d1d1' : '#add8e6',
+                      marginStart: item.clientFrom === auth?.email ? 40 : 5,
+                      marginEnd: item.clientFrom === auth?.email ? 5 : 40,
                       marginVertical: 5,
                       padding: 10,
                       borderRadius: 10,
@@ -251,19 +257,6 @@ const lastOffset = useRef(0);
                   </View>
                 </>
               )}
-
-                onScroll={(event) => {
-                      const currentOffset = event.nativeEvent.contentOffset.y;
-
-                      if (currentOffset > lastOffset.current) {
-                        console.log("Scrolling DOWN");
-                      } else {
-                        console.log("Scrolling UP");
-                        setIsAtBottom(false);
-                      }
-                      lastOffset.current = currentOffset;
-                    }}
-                    scrollEventThrottle={16}
             />
  
           <View

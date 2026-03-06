@@ -46,7 +46,6 @@ export default function ProfileGallery({ setCurrentStep, email, currentStep }: a
                  if(res.status) {
                    const updatedUser = await getLoginData();
                    dispatch(login(updatedUser));
-                    Alert.alert("Profile uploaded successfully");
                   } else {
                     Alert.alert("Failed to upload profile");
                   }

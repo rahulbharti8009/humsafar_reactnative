@@ -32,7 +32,7 @@ export const ChatListScreen: React.FC<Props> = ({ navigation }) => {
 
                    const chatListApi=async()=> {
                           const payload = {
-                             mobile : user?.mobile
+                             email : user?.email
                           }
                         const res = await postApi<Chat[], any>(
                           ENDPOINT.INVITE.CHAT_LIST,
@@ -77,7 +77,6 @@ export const ChatListScreen: React.FC<Props> = ({ navigation }) => {
                     });
 
                     const handleReadMsg = () => {
-                      console.log('read mesg');
                       socket?.emit('getchatList', {
                         mobile : user?.mobile
                       });

@@ -16,9 +16,7 @@ export const postApi = async <T, P = unknown>(
   payload: P
 ): Promise<ApiResponse<T>> => {
   try {
-    log(url,"payload",payload)
     const { data } = await API.post<ApiResponse<T>>(url, payload);
-    log(url, data)
 
     return data;
   } catch (error) {

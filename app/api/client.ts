@@ -9,7 +9,7 @@ export const API = axios.create({
 });
 
 API.interceptors.request.use((request)=> {
-  console.log('Starting Request', JSON.stringify(request.data, null, 2))
+  // console.log(`Payload ${request.baseURL}${request.url}`, JSON.stringify(request.data, null, 2))
   return request
 })
 

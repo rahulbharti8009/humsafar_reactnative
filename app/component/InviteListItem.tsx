@@ -4,7 +4,7 @@ import { Invite, User } from '../types/auth';
 import { useTheme } from '../theme/ThemeContext';
 import { MyCircle } from './MyCircle';
 
-export const InviteListItem: React.FC<{mobile? : string, user: Invite ,  onPress: (requestType: string) => void }> = ({mobile, user, onPress }) => {
+export const InviteListItem: React.FC<{user: Invite ,  onPress: (requestType: string) => void }> = ({ user, onPress }) => {
     const scheme = useColorScheme(); // "light" or "dark"
     const { theme, toggleTheme, themeColor } = useTheme();
 

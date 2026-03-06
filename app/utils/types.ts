@@ -35,12 +35,12 @@ export interface GroupUser {
   // Message Type
 export interface ChatMessage {
   message: string;
-  from : string,
+  from ?: string,
   clientFrom: string;
   clientTo: string;
-  date: string;
-  time: string;
-  fcmToken: string;
+  date?: string;
+  time?: string;
+  fcmToken?: string;
   isUnread: boolean;
 }
 

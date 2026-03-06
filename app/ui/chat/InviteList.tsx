@@ -30,8 +30,9 @@ export const InviteListScreen: React.FC<Props> = ({ navigation }) => {
   const { theme , themeColor, setNotification } = useTheme();
 
                  const inviteListApi=async()=> {
+                  try{
                           const payload = {
-                               mobile : user?.mobile
+                               email : user?.email
                           }
                         const res = await postApi<Invite[], any>(
                           ENDPOINT.INVITE.INVITE_LIST,
@@ -40,9 +41,14 @@ export const InviteListScreen: React.FC<Props> = ({ navigation }) => {
                        
                         if(res.status) {
                           setInviteList(res.value || []);
-                          setNotification(res.value && res.value.length > 0 ? res.value.length : 0);
                         }
-                    }
+                          setNotification(res.value?.length || 0);
+
+                        }catch(error){
+                            console.log(error);
+                          } finally {
+                          }
+                       }
             
                   const rejectUserApi=async(payload: any)=> {
                         try{
@@ -95,28 +101,25 @@ export const InviteListScreen: React.FC<Props> = ({ navigation }) => {
        <FlatList
               style={{ backgroundColor: themeColor.background }}
                 data={inviteList}
-                keyExtractor={item => item.mobile}
+                keyExtractor={(item, idx) => idx.toString()}
                 ItemSeparatorComponent={() => (
                   <View style={{ height: 10 }} />
                 )}
                 renderItem={({ item }) => (
                   <InviteListItem
-                    mobile={user?.mobile}
                     user={item}
                     onPress={(requestType) =>{
                     
                       const params = {
                         sender : {
-                           sender : user?.mobile,
+                           sender : user?.email,
                            name : user?.name,
-                           mobile : user?.mobile,
-                           color : user?.color
+                           email : user?.email,
                         },
                         reciever : {
-                            reciever :  item.mobile,
+                            reciever :  item.email,
                             name :  item.name,
-                            mobile :  item.mobile,
-                            color :  item.color
+                            email :  item.email,
                         }
                       }
 

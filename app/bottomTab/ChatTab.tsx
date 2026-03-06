@@ -138,7 +138,6 @@ export const ChatTab: React.FC<Props> = ({ navigation }) => {
                     });
 
                     const handleReadMsg = () => {
-                      console.log('read mesg');
                       socket?.emit('getchatList', {
                         mobile : user?.mobile
                       });

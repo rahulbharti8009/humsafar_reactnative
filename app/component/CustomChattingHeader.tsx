@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import MySocket from '../utils/socket';
 import { useAppSelector } from '../redux/hook/hook';
 
-const CustomChattingHeader = ({ title, online  }: {title: string,online: string}) => {
+const CustomChattingHeader = ({ title, name, online  }: {title: string, name: string ,online: string}) => {
     const { theme, toggleTheme, themeColor } = useTheme();
     const auth = useAppSelector((state) => state.auth.user)
 
@@ -57,7 +57,7 @@ const CustomChattingHeader = ({ title, online  }: {title: string,online: string}
             fontWeight: 'bold',
           }}
         >
-          {`${title.substring(0,1).toUpperCase()}${title.substring(1,title.length)}`}
+          {name ||  `${title.substring(0,1).toUpperCase()}${title.substring(1,title.length)}`}
         </Text>
      {online == 'online' && <Text
           style={{

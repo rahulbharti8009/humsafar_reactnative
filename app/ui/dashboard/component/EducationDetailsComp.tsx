@@ -23,7 +23,6 @@ import BottomSheetDropdown from "../../../bottomSheet/BottomSheetDropdown";
 
 export default function EducationDetails({ setCurrentStep, email }: any) {
     const { theme , themeColor} = useTheme();
-    const dispatch = useDispatch();
         const user = useAppSelector(state => state.auth.user);
       
   const [form, setForm] = useState<ProfileEntity>({
@@ -109,11 +108,9 @@ export default function EducationDetails({ setCurrentStep, email }: any) {
                 );
                     if(res.status) {
                         if (user != null) {
-                          const updatedUser = { ...user, isProfileActive: true ,name : res.value?.personal?.name || user.name, mobile: res.value?.email || user.mobile};
+                               const updatedUser = { ...user, isProfileActive: true ,name : res.value?.personal?.name || user.name, mobile: res.value?.email || user.mobile};
                             await setLoginSave(updatedUser);
-                            // dispatch(login(updatedUser));
                             setCurrentStep(3);
-                            Alert.alert(`${res.message || "Profile saved successfully"}`);
                         } else {
                           Alert.alert("Error", "User data not found");
                         }

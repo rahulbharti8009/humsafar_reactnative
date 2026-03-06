@@ -119,12 +119,11 @@ const handleChange = (text: string, index: number) => {
     setTimeLeft(TIMER_DURATION);
     setOtp(new Array(OTP_LENGTH).fill(''));
     inputs.current[0].focus();
-    onLogin();
+    SendOtp();
   };
 
-  const onLogin = async () => {
-       
-          try {
+  const SendOtp = async () => {
+    try {
               const payload: LoginPayload = {
                   email: email.toLowerCase()
                 };
@@ -134,6 +133,7 @@ const handleChange = (text: string, index: number) => {
                   payload 
                 );
                     if(res.status) {
+                      
                     } else {
                       Alert.alert("Error", res.message);
                     }
@@ -158,7 +158,6 @@ const handleChange = (text: string, index: number) => {
                 payload 
               );
                   if(res.status) {
-                          // Alert.alert("success", res.message);
                         await setLoginSave(res.value!);
                               navigation.reset({
                                 index: 0,
@@ -170,8 +169,8 @@ const handleChange = (text: string, index: number) => {
                                 ],
                               });  
                             } else {
-                    Alert.alert("Error", res.message);
-                  }
+                          Alert.alert("Error", res.message);
+                        }
             } catch (error) {
              console.log(  error);
               Alert.alert("Error", "Something went wrong");
