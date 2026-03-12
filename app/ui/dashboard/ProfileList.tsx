@@ -4,8 +4,9 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  View,
 } from "react-native";
-import { ProfileEntity } from "../../types/profile.type";
+import { ImageEntity, ProfileEntity } from "../../types/profile.type";
 import MySocket from "../../utils/socket";
 import { useAppSelector } from "../../hook/hook";
 import { postApi } from "../../types/genericType";
@@ -17,6 +18,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../utils/types";
 import { useNavigation } from "@react-navigation/native";
 import { ProfileCard } from "./component/ProfileCard";
+import { log } from "../../utils/helper";
+import { PreviewGallery } from "./component/PreviewGallery";
 
 export type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, RouteName.ChatTab>;
@@ -32,6 +35,8 @@ export default function ProfileListScreen() {
   const [profileList, setProfileList] = React.useState<ProfileEntity[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
+    const [previewGallery, setPreviewGallery] = useState<ImageEntity[]>([]);
+const [showGallery, setShowGallery] = useState(false);
 
     useEffect(()=> {
     if(user != null && user.isProfileActive) {        
@@ -80,34 +85,39 @@ export default function ProfileListScreen() {
 if (user == null) return
 
   return (
+     <>
       <FlatList
         style={{margin: 10}}
         data={profileList}
         keyExtractor={(item, index) => item.email || index.toString()}
-        renderItem={({ item }) => <ProfileCard item={item}  user={user} onPress={() => {
+        renderItem={({ item }) => <ProfileCard item={item} user={user}
+        onPress={() => {
 
-            const socket = MySocket.getInstance().getSocket();
-                      socket?.emit('readMsg', {
-                      sender : user?.email,
-                      reciever : item?.email
-                    });
+          const socket = MySocket.getInstance().getSocket();
+          socket?.emit('readMsg', {
+            sender: user?.email,
+            reciever: item?.email
+          });
 
-                    const handleReadMsg = () => {
-                      socket?.emit('getchatList', {
-                        email : user?.email
-                      });
+          const handleReadMsg = () => {
+            socket?.emit('getchatList', {
+              email: user?.email
+            });
 
-                          navigation.navigate(RouteName.ChatHistory, {
-                              user: {
-                                name: item?.personal?.name || "",
-                                email: item?.email || "",
-                              }
-                            });        
-                         };
-                    socket?.on(`readMsg${user?.mobile}`, handleReadMsg);
+            navigation.navigate(RouteName.ChatHistory, {
+              user: {
+                name: item?.personal?.name || "",
+                email: item?.email || "",
+              }
+            });
+          };
+          socket?.on(`readMsg${user?.mobile}`, handleReadMsg);
+        } } 
+        onPreviewGalery={(image)=> {
+        setPreviewGallery(image);
+        setShowGallery(true); // ✅ open modal
 
-             
-        }}/>}
+        } }/>}
         showsVerticalScrollIndicator={false}
          // 🔥 PAGINATION
         onEndReached={() => {
@@ -130,6 +140,18 @@ if (user == null) return
           }}  
         ListEmptyComponent={<NoDataFound />}
       />
+
+      {previewGallery.length > 0 && (
+        <PreviewGallery
+          images={previewGallery}
+          visible={showGallery}
+          onClose={() => {
+            setShowGallery(false)
+            setPreviewGallery([])
+          }}
+        />
+      )}
+     </>
   );
 }
 

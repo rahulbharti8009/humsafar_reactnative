@@ -5,7 +5,7 @@ export const randomColor = () => {
 
   const isDebug = true
   export const log = (tag?: string, token?: any, ...args: any)=> {
-    if(isDebug){
+    if(isDebug) {
       console.log(tag, token, args)
     }
   }
@@ -50,3 +50,13 @@ export const isValidEmail = (email: string) => {
   return regex.test(email);
 };
 
+export const formatDate = (dateString: string) => {
+   if(dateString == "") return
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};

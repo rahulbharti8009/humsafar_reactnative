@@ -6,10 +6,11 @@ export enum RouteName {
     ChatTab = 'chattab',
     Otp = 'Otp',
     Users = 'Users',
-    Profile = 'Profile',
+    Profile = 'profile',
     ChatHistory = 'ChatHistory',
     AddGroupUI = 'AddGroupUI',
-    VideoCall = 'VideoCall'
+    VideoCall = 'VideoCall',
+    ProfileScreen = 'ProfileScreen'
   }
   
 

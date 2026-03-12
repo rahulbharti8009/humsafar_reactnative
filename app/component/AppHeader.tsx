@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,31 +9,55 @@ import {
 import { useTheme } from "../theme/ThemeContext";
 import { Icon } from "./ImageComp";
 import { MyCircle } from "./MyCircle";
+import { getProfileExpData } from "../utils/localDB";
+import { log } from "../utils/helper";
+import { SOCKET_URL } from "../utils/constant";
+import { useAppSelector } from "../redux/hook/hook";
 
 export default function AppHeader({
   title,
   onMenuPress,
   onProfilePress,
+  goBack
 }: any) {
       const { theme, toggleTheme, themeColor } = useTheme();
+        const profile = useAppSelector(state => state.profile.profile);
 
-  return (
-    <View style={[styles.container, { backgroundColor: themeColor.statusbar }]}>
-      <StatusBar barStyle="light-content" />
-
-      {/* LEFT ICON */}
-  <MyCircle  size={40} color={themeColor.profileSelecter}>
+const ImageType =()=> {
+  if(title === 'Profile'){
+    return  <TouchableOpacity
+              onPress={goBack}
+                    activeOpacity={0.7}
+                  >
+                    <Icon
+                      size={35}
+                          source={ require("../../assets/back.png") }
+                          tintColor={themeColor.text}                    />
+              </TouchableOpacity>
+  }
+  return <MyCircle  size={40} color={themeColor.profileSelecter}>
               <TouchableOpacity
+              onPress={onProfilePress}
                     activeOpacity={0.7}
                    
                   >
                     <Icon
                       size={35}
-                      source={ require("../../assets/ic_user.png")
+                          source={
+                              profile?.profileImages && profile?.profileImages?.uri
+                                ? { uri: `${SOCKET_URL}/${profile?.profileImages?.uri}` }
+                                : require("../../assets/ic_user.png")
                             }
                     />
               </TouchableOpacity>
                </MyCircle>
+}
+  return (
+    <View style={[styles.container, { backgroundColor: themeColor.statusbar }]}>
+      <StatusBar barStyle="light-content" />
+
+      {/* LEFT ICON */}
+    <ImageType/>
 
       {/* TITLE */}
       <Text style={styles.title}>{title}</Text>

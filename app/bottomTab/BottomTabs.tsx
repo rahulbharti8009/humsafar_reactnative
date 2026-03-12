@@ -7,13 +7,14 @@ import { ProfileScreen } from '../ui/dashboard/ProfileScreen';
 import { InviteListScreen } from '../ui/chat/InviteList';
 import { ChatListScreen } from '../ui/chat/ChatList';
 
-import { getLoginData } from '../utils/localDB';
+import { getLoginData, getProfileExpData } from '../utils/localDB';
 import { login } from '../redux/slice/authSlice';
 import { useAppSelector } from '../hook/hook';
 import MySocket from '../utils/socket';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { useTheme } from '../theme/ThemeContext';
 import { Invite } from '../types/auth';
+import {  setProfileRedux } from '../redux/slice/profileSlice';
 
 const Tab = createBottomTabNavigator();
 
@@ -28,14 +29,17 @@ export const BottomTabs = () => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await getLoginData();
+      const profile = await getProfileExpData();
+
       if (res) dispatch(login(res));
+      if (res) dispatch(setProfileRedux(profile));
     };
     fetchData();
   }, []);
 
 useEffect((): (() => void) | void => {
-  if (!user?.mobile) return;
-  const mobile: string = user.mobile;
+  if (!user?.email) return;
+  const mobile: string = user.email;
   const socket = MySocket.getInstance().connect(mobile);
     const invite_list: string = `invite_list${mobile}`;
 
@@ -55,7 +59,7 @@ useEffect((): (() => void) | void => {
     };
 
       const handleInviteList = (data: Invite[]): void => {
-        setNotification(data.length > 0 ? data.length : 0);
+            setNotification(data.length > 0 ? data.length : 0);
             // setInviteList(data ?? []);
           };
 
@@ -165,12 +169,6 @@ useEffect((): (() => void) | void => {
             fontSize: 12,
           },
         }}
-      />
-
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileScreen}
-        options={{ title: 'Profile' }}
       />
     </Tab.Navigator>
   );

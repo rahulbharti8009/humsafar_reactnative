@@ -9,8 +9,10 @@ export class ENDPOINT {
   };
     static PROFILE = {
    PROFILE_LIST : `/profileList`,
-   PROFILE_DETAILS : `/save_profile`,
+   PROFILE_SAVE : `/save_profile`,
    PROFILR_PICTURE : `/profilePic`,
+   PROFILE_DETAILS : `/profile`,
+   DELETE_PROFILE_PIC : `/delete-image`,
   };
 
   static INVITE = {

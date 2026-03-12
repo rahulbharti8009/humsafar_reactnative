@@ -17,7 +17,7 @@ export const MyCircle = ({ children, color, size = 50, marginTop = 0, style , pa
   const { theme, toggleTheme, themeColor } = useTheme();
 
   const bgColor =
-  color || user?.color || themeColor.navbar;
+  color || themeColor.navbar;
 
   return (
     <View style={[{width: size, height:size, borderRadius: size/2, backgroundColor: bgColor,marginTop: marginTop, justifyContent:'center', alignItems:'center', padding: padding},  style,]}>

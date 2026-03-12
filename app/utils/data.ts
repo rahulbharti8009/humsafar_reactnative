@@ -225,3 +225,49 @@ export const Religion =  [
       ]
     }
   ]
+
+
+  export const qualification = [
+  { "label": "Below 10th", "value": "Below 10th" },
+  { "label": "10th Pass", "value": "10th Pass" },
+  { "label": "12th / Higher Secondary", "value": "12th / Higher Secondary" },
+
+  { "label": "ITI", "value": "ITI" },
+  { "label": "Polytechnic Diploma", "value": "Polytechnic Diploma" },
+  { "label": "Diploma in Engineering", "value": "Diploma in Engineering" },
+  { "label": "Diploma in Computer Applications", "value": "Diploma in Computer Applications" },
+  { "label": "Other Diploma", "value": "Other Diploma" },
+
+  { "label": "BA (Bachelor of Arts)", "value": "BA (Bachelor of Arts)" },
+  { "label": "BSc (Bachelor of Science)", "value": "BSc (Bachelor of Science)" },
+  { "label": "BCom (Bachelor of Commerce)", "value": "BCom (Bachelor of Commerce)" },
+  { "label": "BBA", "value": "BBA" },
+  { "label": "BCA", "value": "BCA" },
+  { "label": "BE / BTech", "value": "BE / BTech" },
+  { "label": "BArch", "value": "BArch" },
+  { "label": "BPharma", "value": "BPharma" },
+  { "label": "MBBS", "value": "MBBS" },
+  { "label": "BDS", "value": "BDS" },
+  { "label": "LLB", "value": "LLB" },
+  { "label": "BEd", "value": "BEd" },
+
+  { "label": "MA", "value": "MA" },
+  { "label": "MSc", "value": "MSc" },
+  { "label": "MCom", "value": "MCom" },
+  { "label": "MBA", "value": "MBA" },
+  { "label": "MCA", "value": "MCA" },
+  { "label": "MTech / ME", "value": "MTech / ME" },
+  { "label": "MPharma", "value": "MPharma" },
+  { "label": "LLM", "value": "LLM" },
+
+  { "label": "CA (Chartered Accountant)", "value": "CA (Chartered Accountant)" },
+  { "label": "CS (Company Secretary)", "value": "CS (Company Secretary)" },
+  { "label": "CMA / ICWA", "value": "CMA / ICWA" },
+
+  { "label": "MPhil", "value": "MPhil" },
+  { "label": "PhD", "value": "PhD" },
+
+  { "label": "Civil Services (IAS / IPS)", "value": "Civil Services (IAS / IPS)" },
+  { "label": "Other Professional Degree", "value": "Other Professional Degree" },
+  { "label": "Not Specified", "value": "Not Specified" }
+] 

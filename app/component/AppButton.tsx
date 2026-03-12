@@ -37,7 +37,7 @@ const AppButton: React.FC<Props> = ({
       style={[
         styles.button,
         disabled && styles.disabledButton,
-        { backgroundColor: themeColor.tabBarActive },
+       !disabled &&  { backgroundColor: themeColor.tabBarActive },
         style,
       ]}
     >

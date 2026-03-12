@@ -38,6 +38,7 @@ interface ThemeContextProps {
     chatSearch: string;
     profileSelecter: string;
     onlyWhite: string;
+    card:string
 
   };
   notification: number;
@@ -88,7 +89,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
     chatSearch: theme === 'dark' ? '#F2F2F7' : '#F2F2F7',
     profileSelecter: theme === 'dark' ? '#1e1e1e' : '#F2F2F7',
     onlyWhite: theme === 'dark' ? '#ffffff' : '#ffffff',
-
+    card: theme === 'dark' ? '#1f1f1f' : '#eaeaea',
     };
   };
   const [themeColor, setThemeColor] = useState<any>(getThemeColor());

@@ -58,8 +58,9 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
         secureTextEntry={isOtp}
         autoFocus={true} 
         textContentType="oneTimeCode"
-        style={[styles.input,{ borderColor: isFocused ?  themeColor.borderColor : '#B0B0B0' , textAlign:  'center'  , color: getColor()
+        style={[styles.input,{ borderColor: isFocused ?  themeColor.borderColor : '#B0B0B0' , textAlign:  'center'  , color: getColor(),
     }]}
+    {...props}
       />
     </View>
   );

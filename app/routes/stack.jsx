@@ -17,6 +17,7 @@ import { ChatTab } from '../bottomTab/ChatTab';
 import ChatHistoryUI from '../ui/chat/ChatHistory';
 import { InviteListScreen } from '../ui/chat/InviteList';
 import { ChatListScreen } from '../ui/chat/ChatList';
+import { Profile } from '../ui/profile/Profile';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,18 @@ export const MyStack = () => {
   const [loading, setLoading] = useState(true);
     const { theme , themeColor} = useTheme();
   
+const linking = {
+  prefixes: ['humsafar://', 'https://humsafar.com'],
+  config: {
+    screens: {
+      [RouteName.Login]: 'login',
+      [RouteName.Dashboard]: 'dashboard',
+      [RouteName.Profile]: 'profile',
+      [RouteName.ChatHistory]: 'chat-history/:id',
+      [RouteName.Chat]: 'chat/:id',
+    },
+  },
+};
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -43,32 +56,33 @@ export const MyStack = () => {
 
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
     <Stack.Navigator
       screenOptions={{ headerShown: false, animation: 'slide_from_right', }}
       initialRouteName={user != null ? RouteName.Dashboard : RouteName.Login}
     >
       <Stack.Screen name={RouteName.Login} component={LoginScreen} />
 
-      <Stack.Screen name={RouteName.Profile} component={ProfileScreen}  
+      <Stack.Screen name={RouteName.Profile} component={Profile}  
            options={({ navigation }) => ({
             headerShown: true,
             header: () => (
               <AppHeader
                 title="Profile"
                 onMenuPress={() => navigation.openDrawer()}
-                onProfilePress={() => alert("Profile")}
+                onProfilePress={() => navigation.goBack()}
+                goBack={()=>  navigation.goBack()}
               />
             ),
           })}
   />
-     <Stack.Screen name={RouteName.Dashboard} component={BottomTabs}   options={({ navigation }) => ({
+     <Stack.Screen name={RouteName.Dashboard} component={BottomTabs} options={({ navigation }) => ({
          headerShown: true,
           header: () => (
                 <AppHeader
                   title={`${user?.name.substring(0,1).toUpperCase()}${user?.name.substring(1).toLowerCase() || user?.mobile || "Home"}`}
                   onMenuPress={() => navigation.openDrawer()}
-                  onProfilePress={() => alert("Profile")}
+                  onProfilePress={() => navigation.navigate(RouteName.Profile)}
                 />
               ),
           })}/>
@@ -78,7 +92,8 @@ export const MyStack = () => {
       <Stack.Screen name={RouteName.ChatHistory} component={ChatHistoryUI} />
       <Stack.Screen name={RouteName.Invite} component={InviteListScreen} />
       <Stack.Screen name={RouteName.Chat} component={ChatListScreen} />
-
+      <Stack.Screen name={RouteName.ProfileScreen} component={ProfileScreen}/>
+      
     </Stack.Navigator>
     </NavigationContainer>
   );

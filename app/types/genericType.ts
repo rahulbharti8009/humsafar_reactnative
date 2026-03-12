@@ -49,19 +49,24 @@ export const uploadProfile = async ({
 }: any) => {
   const formData = new FormData();
   formData.append("email", email);
-  const fileType = getFileType(profileImages);
 
-if (!fileType) {
+let  fileType: string | null = ''
+if(profileImages)
+   fileType = getFileType(profileImages);
+
+if (profileImages && !fileType) {
   Alert.alert("Only JPG, JPEG and PNG images are allowed");
   return;
 }
 
   // single profile image
-formData.append("profileImages", {
-  uri: profileImages,
-  type: fileType,
-  name: `profile.${profileImages.split(".").pop()}`,
-});
+  if(profileImages) {
+    formData.append("profileImages", {
+      uri: profileImages,
+      type: fileType,
+      name: `profile.${profileImages.split(".").pop()}`,
+    });
+  }
 
   // ✅ Gallery Images (Multiple)
 if (galleryImages?.length > 0) {
@@ -78,7 +83,7 @@ if (galleryImages?.length > 0) {
 }
 
   try {
-    const response = await axios.post(
+    const response = await API.post(
       `${BASE_URL}/profilePic`,
       formData,
       {

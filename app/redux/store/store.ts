@@ -1,5 +1,7 @@
 import { configureStore, Middleware } from '@reduxjs/toolkit';
 import authReducer from '../slice/authSlice.ts';
+import profileReducer from '../slice/profileSlice.ts';
+
 
 // ✅ Typed logger middleware
 const loggerMiddleware: Middleware =
@@ -13,6 +15,7 @@ const loggerMiddleware: Middleware =
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    profile: profileReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(loggerMiddleware),

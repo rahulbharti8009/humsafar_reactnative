@@ -47,47 +47,59 @@ const ChatHistoryUI = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  // const [isAtBottom, setIsAtBottom] = useState(true);
 
 
 
-  const paginationRef = useRef(false);
+    const paginationRef = useRef(false);
+    const isAtBottom = useRef(true);
+    const pageRef = useRef(1);
+    const onEndReachedCalledDuringMomentum = useRef(false);
+    const scrollOffsetRef = useRef(0);
 
     /* ---------------- LOAD CHAT HISTORY ---------------- */
-  const handleChatHistory = async (pageNumber = 1) => {
+ const handleChatHistory = async (pageNumber = 1) => {
   if (isLoading || !hasMore || paginationRef.current) return;
-      paginationRef.current = true;
 
+  paginationRef.current = true;
   setLoading(true);
+  const previousOffset = scrollOffsetRef.current;
 
-    try {
-      const payload: ChatHistoryPayload = {
-        name: `${auth?.email}-${user?.email}`,
-         page: pageNumber,
-        limit: 20,
-      };
-      const data = await postApi<ChatMessage[], ChatHistoryPayload>(
-        ENDPOINT.CHAT.CHAT_HISTORY,
-        payload
-      );
+  try {
+    const payload: ChatHistoryPayload = {
+      name: `${auth?.email}-${user?.email}`,
+      page: pageNumber,
+      limit: 20,
+    };
 
-        if (data.status) {
+    const data = await postApi<ChatMessage[], ChatHistoryPayload>(
+      ENDPOINT.CHAT.CHAT_HISTORY,
+      payload
+    );
+
+    if (data.status) {
       if (pageNumber === 1) {
         setChat(data.value || []);
       } else {
-      setChat(prev => [...(data.value || []), ...prev]);      }
+        setChat(prev => [...(data.value || []), ...prev]);
+         requestAnimationFrame(() => {
+          flatListRef.current?.scrollToOffset({
+            offset: previousOffset + 400, // approx height of new items
+            animated: false,
+          });
+        });
+      }
 
+      pageRef.current = pageNumber;
       setHasMore(data.hasMore || false);
-      setPage(pageNumber);
     }
-
-          } catch (error) {
-          console.log(error);
-        } finally {
-          paginationRef.current = false;  // ✅ unlock
-          setLoading(false);
-        }
-  };
+  } catch (error) {
+    console.log(error);
+  } finally {
+    paginationRef.current = false;
+    setLoading(false);
+  }
+};
   /* ---------------- UNREAD / ONLINE STATUS ---------------- */
 
   const checkIsUnread=()=> {
@@ -149,68 +161,99 @@ const ChatHistoryUI = () => {
 
     /* ---------------- AUTO SCROLL TO BOTTOM ---------------- */
 
-    // useEffect(() => {
-     
-    //   if (isAtBottom) {
-    //       flatListRef.current?.scrollToEnd({
-    //         animated: true,
-    //       });
-    //   }
-    // }, [chat]);
+    useEffect(() => {
+      if (isAtBottom.current) {
+          flatListRef.current?.scrollToEnd({
+            animated: true,
+          });
+      }
+    }, [chat]);
+
+
+    const keyboardVisible = useRef(false);
+
+useEffect(() => {
+  const showSub = Keyboard.addListener("keyboardDidShow", () => {
+    keyboardVisible.current = true;
+  });
+
+  const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+    keyboardVisible.current = false;
+
+    // Fix bottom gap issue
+    flatListRef.current?.scrollToEnd({ animated: false });
+  });
+
+  return () => {
+    showSub.remove();
+    hideSub.remove();
+  };
+}, []);
 
 
   return (
+  <View style={{ backgroundColor: themeColor.background   , flex: 1}}>
+
     <KeyboardAvoidingView
   style={{ flex: 1 }}
   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  // keyboardVerticalOffset={20}
+  keyboardVerticalOffset={40}
 >
     <View style={{ backgroundColor: themeColor.background   , flex: 1}}>
           <CustomChattingHeader
         title={`${user?.email}`} name={`${user?.name}`} online={isRecieverUnread ? 'online': 'offline'}
       />
           <FlatList
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+
               ref={flatListRef} 
               data={chat}
               style={{ flex: 1, padding: 10 }}
-            //  onScroll={(event) => {
-            //         const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+              // contentContainerStyle={{ padding: 10 }}
+                onScroll={(event) => {
+                    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+                      scrollOffsetRef.current = contentOffset.y;
 
-            //         const isBottom =
-            //           layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+                      // Detect Bottom
+                      const isBottom =
+                        layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
 
-            //         const isTop = contentOffset.y <= 50;
+                      // Detect Top
+                      const isTop = contentOffset.y <= 100;
 
-            //         setIsAtBottom(isBottom);
+                      if (isBottom) {
+                        console.log("Reached Bottom");
+                         isAtBottom.current = true;
+                      }
 
-            //         if (isTop && !isLoading && hasMore && !paginationRef.current) {
-            //           handleChatHistory(page + 1);
-            //         }
-            //       }}
-            //  scrollEventThrottle={16}
-
-              onContentSizeChange={() => {
-                log("","onContentSizeChange")
-                if (isAtBottom) {
-                  flatListRef.current?.scrollToEnd({ animated: true });
+                      if (isTop) {
+                        console.log("Reached Top");
+                        isAtBottom.current = false;
+                      }
+                        //  paginationRef.current = isBottom;
+                  }
                 }
-              }}
-              
+              scrollEventThrottle={0.3}
+
               showsVerticalScrollIndicator={false}
               // PAGGINATION
               onStartReached={() => {
-              console.log('start reached');
-               if(isAtBottom) return
+              console.log('start reached',isAtBottom.current, !isLoading , hasMore , !paginationRef.current , chat.length >= 20, onEndReachedCalledDuringMomentum.current);
+                if (onEndReachedCalledDuringMomentum.current) return;
+                if (paginationRef.current || !hasMore || isLoading) return;
+                if (isAtBottom.current) return;
 
-              if (!isLoading && hasMore && !paginationRef.current && chat.length >= 20) {
-                  handleChatHistory(page + 1);
-                } 
+                onEndReachedCalledDuringMomentum.current = true;
+                console.log('start reached again')
+                handleChatHistory(pageRef.current + 1);
               }}
-              onStartReachedThreshold={0.3}
+              onStartReachedThreshold={0}
+              onMomentumScrollBegin={() => {
+                  onEndReachedCalledDuringMomentum.current = false;
+                }}
               // LOADING HEADER
-              ListHeaderComponent={
-                    isLoading ? <ActivityIndicator size="small" /> : null
-                  }
+              ListHeaderComponent={isLoading ? <ActivityIndicator size="small" /> : null }
               keyExtractor={(_, index) => index.toString()}
               ListEmptyComponent={<NoDataFound />}
               renderItem={({ item, index }) => (
@@ -261,8 +304,6 @@ const ChatHistoryUI = () => {
  
           <View
   style={{
-        bottom: 0,
-
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: themeColor.background,
@@ -296,7 +337,7 @@ const ChatHistoryUI = () => {
           flex: 1,
           maxHeight: 100,
           fontSize: 16,
-          color: themeColor.text,
+          color: themeColor.black,
           paddingVertical: 6,
         }}
       />
@@ -324,7 +365,10 @@ const ChatHistoryUI = () => {
     </View>
 </View>
     </View>
+
  </KeyboardAvoidingView>
+     </View>
+
   );
 };
 
