@@ -9,7 +9,7 @@ import {
 import { useTheme } from "../theme/ThemeContext";
 import { Icon } from "./ImageComp";
 import { MyCircle } from "./MyCircle";
-import { getProfileExpData } from "../utils/localDB";
+import { clearAll, clearLoginData, getProfileExpData, setLoginSave } from "../utils/localDB";
 import { log } from "../utils/helper";
 import { SOCKET_URL } from "../utils/constant";
 import { useAppSelector } from "../redux/hook/hook";
@@ -18,13 +18,14 @@ export default function AppHeader({
   title,
   onMenuPress,
   onProfilePress,
-  goBack
+  goBack,
+  logout
 }: any) {
       const { theme, toggleTheme, themeColor } = useTheme();
         const profile = useAppSelector(state => state.profile.profile);
 
 const ImageType =()=> {
-  if(title === 'Profile'){
+  if(title === 'Profile' || title === 'ViewProfile' || title === 'OTP'){
     return  <TouchableOpacity
               onPress={goBack}
                     activeOpacity={0.7}
@@ -32,9 +33,11 @@ const ImageType =()=> {
                     <Icon
                       size={35}
                           source={ require("../../assets/back.png") }
-                          tintColor={themeColor.text}                    />
+                          tintColor={themeColor.text}
+                          />
               </TouchableOpacity>
   }
+
   return <MyCircle  size={40} color={themeColor.profileSelecter}>
               <TouchableOpacity
               onPress={onProfilePress}
@@ -61,7 +64,9 @@ const ImageType =()=> {
 
       {/* TITLE */}
       <Text style={styles.title}>{title}</Text>
-
+{/* RIGHT ICON */}
+<View style={{flexDirection:'row', gap: 10}}>
+   
       {/* RIGHT ICON */}
      <TouchableOpacity onPress={() => {
               toggleTheme();
@@ -74,6 +79,19 @@ const ImageType =()=> {
                 /> 
               </View>
             </TouchableOpacity>
+              {title == 'Profile' && <TouchableOpacity onPress={async() => {
+                 logout()
+            }}>
+            <View style={[{padding: 0,}]}>
+                <Icon
+                  source={theme === 'dark' ? require('../../assets/ic_logout.png') : require('../../assets/ic_logout.png')}
+                  size={30}
+                  tintColor={theme === 'dark' ? themeColor.white: themeColor.black}
+                /> 
+              </View>
+            </TouchableOpacity>
+            }
+    </View>
     </View>
   );
 }

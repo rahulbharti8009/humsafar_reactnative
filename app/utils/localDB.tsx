@@ -32,6 +32,10 @@ export const getProfileData = async (): Promise<PersonalDetails | null> => {
     return  user ? JSON.parse(user) : null;
  };
 
+  export const clearProfileData = async (): Promise<void> => {
+  await AsyncStorage.removeItem("profile_personal_details");
+};
+
  export const setProfileExpData = async (profileData: ProfileEntity): Promise<void> => {
   await AsyncStorage.setItem("profile_exp_details", JSON.stringify(profileData));
 };
@@ -40,8 +44,16 @@ export const getProfileExpData = async (): Promise<ProfileEntity | null> => {
    const user = await AsyncStorage.getItem("profile_exp_details");
     return  user ? JSON.parse(user) : null;
  };
+  export const clearProfileExpData = async (): Promise<void> => {
+  await AsyncStorage.removeItem("profile_exp_details");
+};
 
-
+  export const clearAll = async (): Promise<void> => {
+  await clearLoginData()
+  await clearProfileExpData()
+  await clearProfileData()
+  
+};
 const USER_KEY = 'user';
 
 export const saveUser = async (user: User) => {

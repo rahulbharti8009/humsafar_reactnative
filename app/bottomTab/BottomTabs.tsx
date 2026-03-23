@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useDispatch } from 'react-redux';
 
 import { DashboardScreen } from '../ui/dashboard/DashboardScreen';
-import { ProfileScreen } from '../ui/dashboard/ProfileScreen';
+import { ProfileScreen } from '../ui/profile/ProfileScreen';
 import { InviteListScreen } from '../ui/chat/InviteList';
 import { ChatListScreen } from '../ui/chat/ChatList';
 
@@ -13,17 +13,18 @@ import { useAppSelector } from '../hook/hook';
 import MySocket from '../utils/socket';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { useTheme } from '../theme/ThemeContext';
-import { Invite } from '../types/auth';
+import { Chat, Invite } from '../types/auth';
 import {  setProfileRedux } from '../redux/slice/profileSlice';
+import { useDeepLink } from '../theme/DeepLinkContext';
+import { Alert, Linking } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
 export const BottomTabs = () => {
   const dispatch = useDispatch();
-    const { theme , themeColor,notification ,setNotification } = useTheme();
-    const [inviteList, setInviteList] = useState<Invite[]>([]);
-
+    const { theme , themeColor,notification ,setNotification, chatMsgCount,setChatMsgCount } = useTheme();
   const user = useAppSelector(state => state.auth.user);
+    const { deeplinkUrl , setDeeplinkUrl} = useDeepLink();
 
   // 🔹 Load login user from local storage
   useEffect(() => {
@@ -33,6 +34,10 @@ export const BottomTabs = () => {
 
       if (res) dispatch(login(res));
       if (res) dispatch(setProfileRedux(profile));
+      if(deeplinkUrl){
+        Linking.openURL(deeplinkUrl)
+        setDeeplinkUrl('')
+      }
     };
     fetchData();
   }, []);
@@ -42,13 +47,22 @@ useEffect((): (() => void) | void => {
   const mobile: string = user.email;
   const socket = MySocket.getInstance().connect(mobile);
     const invite_list: string = `invite_list${mobile}`;
+    const chat_list: string = `chat_list${mobile}`;
 
   try {
     // 🔥 CONNECT LISTENERS
     const handleConnect = (): void => {
       console.log('✅ Connected:', socket.id);
       socket.emit('getInviteList', { mobile });
+      socket.emit('getchatList', { mobile });
+
     };
+    const handleReconnect = (): void => {
+  console.log('🔁 Reconnected');
+
+  socket.emit('getInviteList', { mobile });
+  socket.emit('getchatList', { mobile });
+};
 
     const handleDisconnect = (reason: string): void => {
       console.log('❌ Disconnected:', reason);
@@ -60,25 +74,32 @@ useEffect((): (() => void) | void => {
 
       const handleInviteList = (data: Invite[]): void => {
             setNotification(data.length > 0 ? data.length : 0);
-            // setInviteList(data ?? []);
           };
-
+   const handleChatList = (data: Chat[]): void => {
+          console.log(JSON.stringify(data))
+          // Alert.alert("",JSON.stringify(data))
+          };
      if (!socket.connected) {
       socket.connect();
     }
 
     socket.on('connect', handleConnect);
+    socket.on('reconnect', handleReconnect);
     socket.on('disconnect', handleDisconnect);
     socket.on('connect_error', handleConnectError);
     socket.on(invite_list, handleInviteList);
+    socket.on(chat_list, handleChatList);
 
       
     // 🔥 CLEANUP
     return (): void => {
       socket.off('connect', handleConnect);
+      socket.off('reconnect', handleReconnect);
       socket.off('disconnect', handleDisconnect);
       socket.off('connect_error', handleConnectError);
       socket.off(invite_list, handleInviteList);
+      socket.off(chat_list, handleChatList);
+
 
       socket.disconnect();
     };
@@ -154,7 +175,14 @@ useEffect((): (() => void) | void => {
       <Tab.Screen
         name="Chat"
         component={ChatListScreen}
-        options={{ title: 'Chat' }}
+        options={{ title: 'Chat' ,
+          tabBarBadge: chatMsgCount > 0 ? chatMsgCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: 'red',
+            color: 'white',
+            fontSize: 12,
+          },
+        }}
       />
 
       <Tab.Screen
@@ -170,6 +198,12 @@ useEffect((): (() => void) | void => {
           },
         }}
       />
+
+         {/* <Tab.Screen
+        name="profile"
+        component={ProfileScreen}
+        options={{ title: 'profile' }}
+      /> */}
     </Tab.Navigator>
   );
 };

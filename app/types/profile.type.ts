@@ -12,6 +12,7 @@ export type ProfileEntity = {
 
   income?: string;
   familyIncome?: string;
+  about?: string;
 
   profileImages?: any;
 

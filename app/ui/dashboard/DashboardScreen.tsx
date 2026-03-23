@@ -6,7 +6,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { ENDPOINT } from '../../api/endpoint';
 import { postApi } from '../../types/genericType';
 import { ProfileEntity } from '../../types/profile.type';
-import { ProfileScreen } from './ProfileScreen';
+import { ProfileScreen } from '../profile/ProfileScreen';
 import ProfileList from './ProfileList';
 import { log } from '../../utils/helper';
 import ProfileListScreen from './ProfileList';

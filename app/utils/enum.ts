@@ -10,7 +10,8 @@ export enum RouteName {
     ChatHistory = 'ChatHistory',
     AddGroupUI = 'AddGroupUI',
     VideoCall = 'VideoCall',
-    ProfileScreen = 'ProfileScreen'
+    ProfileScreen = 'ProfileScreen',
+    ViewProfile = 'viewprofile'
   }
   
 

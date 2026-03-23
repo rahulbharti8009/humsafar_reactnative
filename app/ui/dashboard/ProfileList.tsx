@@ -5,6 +5,7 @@ import {
   FlatList,
   ActivityIndicator,
   View,
+  Alert,
 } from "react-native";
 import { ImageEntity, ProfileEntity } from "../../types/profile.type";
 import MySocket from "../../utils/socket";
@@ -112,7 +113,10 @@ if (user == null) return
             });
           };
           socket?.on(`readMsg${user?.mobile}`, handleReadMsg);
-        } } 
+        } }
+        onPressViewProfile={(email)=> {
+          navigation.navigate(RouteName.ViewProfile, {email: email})
+        }} 
         onPreviewGalery={(image)=> {
         setPreviewGallery(image);
         setShowGallery(true); // ✅ open modal

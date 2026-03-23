@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '../../types/auth';
 import { store } from '../store/store';
-import { clearLoginData } from '../../utils/localDB';
+import { clearAll, clearLoginData } from '../../utils/localDB';
 
 interface AuthState {
   user: User | null;
@@ -19,7 +19,7 @@ const authSlice = createSlice({
       state.user = action.payload;
     },
     logout: (state) => {
-      clearLoginData();
+      clearAll();
       state.user = null;
     },
   },

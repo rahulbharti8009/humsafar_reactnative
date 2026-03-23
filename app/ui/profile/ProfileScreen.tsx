@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, Text, View , Dimensions, StyleSheet, TouchableOpacity, Image} from 'react-native'
-import { getLoginData, setProfileData, setProfileExpData } from '../../utils/localDB'
+import { getLoginData, getProfileExpData, setProfileData, setProfileExpData } from '../../utils/localDB'
 import { User } from '../../types/auth';
-import PersonalDetails from '../profile/component/AddUpdate/PersonalDetailsComp';
-import EducationDetails from '../profile/component/AddUpdate/EducationDetailsComp';
-import Stepper from '../profile/component/AddUpdate/Stepper';
+import PersonalDetails from './component/AddUpdate/PersonalDetailsComp';
+import EducationDetails from './component/AddUpdate/EducationDetailsComp';
+import Stepper from './component/AddUpdate/Stepper';
 import { useTheme } from '../../theme/ThemeContext';
-import ProfileGallery from '../profile/component/AddUpdate/ProfileGallery';
+import ProfileGallery from './component/AddUpdate/ProfileGallery';
 import { useAppSelector } from '../../redux/hook/hook';
 import { postApi } from '../../types/genericType';
 import { ProfileEntity } from '../../types/profile.type';
@@ -14,7 +14,7 @@ import { ENDPOINT } from '../../api/endpoint';
 import { useDispatch } from 'react-redux';
 import { setProfileRedux } from '../../redux/slice/profileSlice';
 import NoDataFound from '../../common/NoDataFound';
-import { ProfileInfo } from '../profile/component/ProfileInformation/ProfileInfo';
+import { ProfileInfo } from './component/ProfileInformation/ProfileInfo';
 const { height } = Dimensions.get("window");
 const IMAGE_SIZE = height * 0.35;
 export const ProfileScreen = () => {
@@ -29,7 +29,7 @@ export const ProfileScreen = () => {
   const dispatch = useDispatch();
 
 
-  const saveProfileApi = async () => {
+  const profileDetailsApi = async () => {
       setLoading(true)
           try {
               const payload  = {
@@ -41,6 +41,8 @@ export const ProfileScreen = () => {
                 );
 
                 if(res.status && res.value) {
+                  let profile = res.value
+                
                   if(profile?.profileImages && profile?.profileImages?.uri){
                     setCurrentStep(4)
                   } else if(profile?.personal && profile?.personal?.age && profile?.income) {
@@ -68,7 +70,7 @@ export const ProfileScreen = () => {
           }
 
   useEffect(()=> {
-    saveProfileApi();
+    profileDetailsApi();
   },[])
   
 

@@ -34,7 +34,7 @@ export const Icon: React.FC<IconProps> = ({
           borderRadius: size/2,
           borderWidth: borderWidth,
           padding:padding,
-          margin
+          margin,
         },
         style,
       ]}

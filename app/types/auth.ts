@@ -4,6 +4,7 @@ export interface LoginPayload {
     otp?: string;
     page?: number;
     limit?: number;  
+    fcmtoken?:string;
   }
   
   export interface Chat {

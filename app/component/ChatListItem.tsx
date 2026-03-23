@@ -5,14 +5,14 @@ import { MyCircle } from './MyCircle';
 import { useTheme } from '../theme/ThemeContext';
 import { getLastTime } from '../utils/helper';
 
-export const ChatListItem: React.FC<{mobile? : string, user: Chat ,  onPress: () => void }> = ({mobile, user, onPress }) => {
+export const ChatListItem: React.FC<{user: Chat ,  onPress: () => void }> = ({ user, onPress }) => {
     const { themeColor } = useTheme();
 
   return (
      <TouchableOpacity style={[styles.container, {backgroundColor: themeColor.background, borderColor: themeColor.borderColor, borderWidth: 0.5}]} onPress={onPress}  activeOpacity={0.7}>
           <View style={{flexDirection:'row'}}>
                     <MyCircle color={user.color} size={40}>
-                      <Text style={[styles.mobile, {color: themeColor.text}]}>{`${user.mobile.substring(0,1)}`}</Text>
+                      <Text style={[styles.mobile, {color: themeColor.text}]}>{`${user.email.substring(0,1)}`}</Text>
                     </MyCircle>
                       
                       <View style={styles.details}>

@@ -26,4 +26,7 @@ export class ENDPOINT {
     CHAT_HISTORY : `/chat/history`,
     SEND_MESSAGE : `/send_message`
   };
+    static NOTIFICATION = {
+       SEND:'/send_notification'
+    }
 }

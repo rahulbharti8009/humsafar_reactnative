@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ImageBackground,
 } from 'react-native';
 import AppButton from '../../component/AppButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,6 +21,8 @@ import { LoginPayload, User } from '../../types/auth';
 import { postApi } from '../../types/genericType';
 import { ENDPOINT } from '../../api/endpoint';
 import { useTheme } from '../../theme/ThemeContext';
+import FirebaseMessagingService from '../../service/FirebaseMessagingService';
+import { log } from '../../utils/helper';
 
 const OTP_LENGTH = 6;
 const TIMER_DURATION = 300;
@@ -148,9 +151,14 @@ export const OtpScreen: React.FC<Props> = ({ navigation }) => {
 
   const onVerify = async () => {
     try {
+       let token = ''
+       if(Platform.OS === 'android'){
+            token = (await FirebaseMessagingService.init()) || '';
+       }
       const payload: LoginPayload = {
         email: email.trim().toLowerCase(),
         otp: otp.join(''),
+        fcmtoken: Platform.OS === 'android' ? `${token}` : ""
       };
 
       setLoading(true);
@@ -159,6 +167,8 @@ export const OtpScreen: React.FC<Props> = ({ navigation }) => {
         ENDPOINT.AUTH.VERIFY_OTP,
         payload
       );
+
+ 
 
       if (res.status) {
         await setLoginSave(res.value!);
@@ -183,141 +193,165 @@ export const OtpScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  return (
-     <KeyboardAvoidingView
+return (
+  <KeyboardAvoidingView
     style={{ flex: 1 }}
     behavior={Platform.OS === "ios" ? "padding" : "height"}
   >
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
-      keyboardShouldPersistTaps="handled"
-    >
-    <View style={[styles.container,{backgroundColor: themeColor.background}]}>
-      <View style={[styles.card,{backgroundColor: themeColor.card}]}>
 
-        <Text style={[styles.title,{color: themeColor.text}]}>Verify OTP</Text>
+<ImageBackground
+  source={require("../../../assets/ic_splash.jpg")}
+  style={styles.background}
+  resizeMode="cover"
+>
 
-        <Text style={styles.subtitle}>OTP has been sent to</Text>
+<View style={styles.overlay} />
 
-        <Text style={styles.email}>{email}</Text>
+<ScrollView
+  contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+  keyboardShouldPersistTaps="handled"
+>
 
-        <View style={styles.otpContainer}>
-          {otp.map((digit, index) => (
-            <TextInput
-              key={index}
-              ref={ref => (inputs.current[index] = ref!)}
-              style={[styles.input,{color: themeColor.text,borderColor: themeColor.inputBorder, backgroundColor: themeColor.background}]}
-              keyboardType="number-pad"
-              maxLength={1}
-              value={digit}
-              onChangeText={text => handleChange(text, index)}
-              onKeyPress={e => handleKeyPress(e, index)}
-              textContentType="oneTimeCode"
-              autoComplete="sms-otp"
-              cursorColor={themeColor.text}
-              selectionColor={themeColor.text}
-              returnKeyType="next"
-              submitBehavior="submit"
-            />
-          ))}
-        </View>
+<View style={styles.centerContainer}>
 
-        <Text style={styles.timer}>
-          {timeLeft > 0 ? `${formatTime(timeLeft)}` : 'OTP Expired'}
-        </Text>
+<View style={styles.card}>
 
-        {timeLeft === 0 && (
-          <TouchableOpacity onPress={resendOtp}>
-            <Text style={styles.resend}>Resend OTP</Text>
-          </TouchableOpacity>
-        )}
+<Text style={styles.title}>Verify OTP</Text>
 
-        <AppButton
-          title="Verify"
-          onPress={onVerify}
-          isLoading={isLoading}
-          disabled={otp.join('').length < 6}
-          style={{ marginTop: 25, width: '80%' }}
-        />
+<Text style={styles.subtitle}>OTP has been sent to</Text>
 
-      </View>
-    </View>
-    </ScrollView>
-    </KeyboardAvoidingView>
-  );
+<Text style={styles.email}>{email}</Text>
+
+<View style={styles.otpContainer}>
+  {otp.map((digit, index) => (
+    <TextInput
+      key={index}
+      ref={ref => (inputs.current[index] = ref!)}
+      style={styles.input}
+      keyboardType="number-pad"
+      maxLength={1}
+      value={digit}
+      onChangeText={text => handleChange(text, index)}
+      onKeyPress={e => handleKeyPress(e, index)}
+      textContentType="oneTimeCode"
+      autoComplete="sms-otp"
+      cursorColor="#000"
+      selectionColor="#000"
+    />
+  ))}
+</View>
+
+<Text style={styles.timer}>
+  {timeLeft > 0 ? `${formatTime(timeLeft)}` : "OTP Expired"}
+</Text>
+
+{timeLeft === 0 && (
+  <TouchableOpacity onPress={resendOtp}>
+    <Text style={styles.resend}>Resend OTP</Text>
+  </TouchableOpacity>
+)}
+
+<AppButton
+  title="Verify"
+  onPress={onVerify}
+  isLoading={isLoading}
+  disabled={otp.join("").length < 6}
+  style={{ marginTop: 25 }}
+/>
+
+</View>
+</View>
+
+</ScrollView>
+</ImageBackground>
+</KeyboardAvoidingView>
+);
 };
 
 const styles = StyleSheet.create({
+background: {
+  flex: 1
+},
 
-container: {
+overlay: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: "rgba(0,0,0,0.4)"
+},
+
+centerContainer: {
   flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: 20,
-  backgroundColor: '#F5F7FB',
+  justifyContent: "center",
+  padding: 20
 },
 
 card: {
-  width: '100%',
-  backgroundColor: '#fff',
+  padding: 25,
   borderRadius: 20,
-  paddingVertical: 35,
-  paddingHorizontal: 20,
-  alignItems: 'center',
 
-  shadowColor: '#000',
-  shadowOpacity: 0.1,
-  shadowRadius: 10,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 5,
+  // glass card
+  backgroundColor: "rgba(255,255,255,0.4)",
+
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.3)",
+
+  shadowOpacity: 0.2,
+  shadowOffset: { width: 0, height: 5 },
+  shadowRadius: 10
 },
 
 title: {
   fontSize: 24,
-  fontWeight: '700',
+  fontWeight: "700",
   marginBottom: 10,
+  textAlign: "center",
+  color: "#fff"
 },
 
 subtitle: {
   fontSize: 14,
-  color: '#777',
+  color: "#ddd",
+  textAlign: "center"
 },
 
 email: {
   fontSize: 16,
-  fontWeight: '600',
+  fontWeight: "600",
   marginBottom: 25,
+  textAlign: "center",
+  color: "#fff"
 },
 
 otpContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  width: '90%',
+  flexDirection: "row",
+  justifyContent: "space-between",
+  width: "100%"
 },
 
 input: {
   width: 45,
   height: 55,
   borderWidth: 1.5,
-  borderColor: '#ddd',
+  borderColor: "#fff",
   borderRadius: 12,
-  textAlign: 'center',
+  textAlign: "center",
   fontSize: 22,
-  fontWeight: '600',
-  backgroundColor: '#FAFAFA',
+  fontWeight: "600",
+  backgroundColor: "rgba(255,255,255,0.8)"
 },
 
 timer: {
   marginTop: 20,
   fontSize: 15,
-  color: '#5f1212',
+  color: "#fff",
+  textAlign: "center"
 },
 
 resend: {
   marginTop: 12,
   fontSize: 15,
-  color: '#3B82F6',
-  fontWeight: '600',
-},
+  color: "#fff",
+  fontWeight: "600",
+  textAlign: "center"
+}
 
 });

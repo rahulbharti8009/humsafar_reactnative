@@ -8,12 +8,10 @@ import { formatDate, log } from "../../../../utils/helper";
 
 export const ProfileInfo = ({ profile, themeColor }: { profile?: ProfileEntity; themeColor: any }) => {
 
-
-log("ProfileInfo",profile)
   return (
  <View style={{justifyContent:'center', alignItems:'center'}}>
                <ProfileAvatar
-                      uri={`${SOCKET_URL}/${profile?.profileImages?.uri}`}
+                      uri={`${profile?.profileImages?.uri}`}
                       themeColor={themeColor.background}
                     />
                 <Text style={{ fontSize: 22, fontWeight: "700", color: themeColor.text }}>
@@ -35,13 +33,13 @@ log("ProfileInfo",profile)
           <ProfileInfoItem icon="💰" label="Income" value={profile?.income} color={themeColor.text} />
 
                {/* About Section */}
-                    <View style={styles.card}>
+                    <View style={[styles.card, {backgroundColor: themeColor.background}]}>
                       <Text style={[styles.sectionTitle, { color: themeColor.text }]}>
                         About
                       </Text>
             
                       <Text style={[styles.aboutText, { color: themeColor.text }]}>
-                        { "No description added"}
+                        { profile?.about || "No description added"}
                       </Text>
                     </View>
     </View>

@@ -13,6 +13,7 @@ export type RootStackParamList = {
     VideoCall: {}
     Chat: undefined;
     Invite: undefined;
+    ViewProfile: undefined
   };
 
   export type ChatUser = {

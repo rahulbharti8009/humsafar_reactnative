@@ -43,10 +43,12 @@ interface ThemeContextProps {
   };
   notification: number;
   setNotification: (message: number) => void;
+   chatMsgCount: number;
+  setChatMsgCount: (message: number) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
-
+const activeColor = 'rgb(191, 134, 10)'
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -68,21 +70,21 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
       listitem: theme === 'dark' ? '#444' : '#DBDBDB',
       black: theme === 'dark' ? '#000000' : '#000000',
       white: theme === 'dark' ? '#ffffff' : '#000000',
-      navbar: theme === 'dark' ? '#444' : '#DD9C0FFF',//DD9C0FFF
+      navbar: theme === 'dark' ? '#444' : activeColor,//DD9C0FFF
       navbarTextColor: theme === 'dark' ? '#000000' : '#ffffff',
       navbarTextBgColor: theme === 'dark' ? '#ffffff' : '#444',
-      statusbar: theme === 'dark' ? '#000000' : '#DD9C0F',
+      statusbar: theme === 'dark' ? '#000000' : activeColor,
       toolbar: theme === 'dark' ? '#121212' : '#FFFFFF',
       time: theme === 'dark' ? '#ffffff' : '#1A700D',
-      borderColor: theme === 'dark' ? '#ffffff' : '#DD9C0FFF',
+      borderColor: theme === 'dark' ? '#ffffff' : activeColor,
       error : theme === 'dark' ? '#ae838b' : '#ff4d6d',
       next: theme === 'dark' ? '#ff4d6d' : '#ff4d6d',
       previous: theme === 'dark' ? '#b7b7b7' : '#0b0d06',
       placeholder: theme === 'dark' ? '#999' : '#929191',
-      chat: theme === 'dark' ? '#DD9C0FFF' : '#DD9C0FFF',
+      chat: theme === 'dark' ? '#DD9C0FFF' : activeColor,
   
     tabBarBgColor: theme === 'dark' ? '#121212' : '#FFFFFF',
-    tabBarActive: theme === 'dark' ? '#DD9C0FFF' : '#DD9C0FFF',
+    tabBarActive: theme === 'dark' ? '#DD9C0FFF' : activeColor,
     tabBarInactive: theme === 'dark' ? '#999999' : '#999999',
     tabBarActiveBgColor: theme === 'dark' ? '#E6F0FF' : '#000000',
 
@@ -112,9 +114,10 @@ useEffect(()=> {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
   const [notification, setNotification] = useState<number>(0);
+  const [chatMsgCount, setChatMsgCount] = useState<number>(0);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, themeColor, notification, setNotification }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, themeColor, notification, setNotification, chatMsgCount ,setChatMsgCount }}>
       {children}
     </ThemeContext.Provider>
   );

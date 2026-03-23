@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { User } from "../../../types/auth";
 import { ImageEntity, ProfileEntity } from "../../../types/profile.type";
 import { useTheme } from "../../../theme/ThemeContext";
-import { ImageBackground, TouchableOpacity, View , Text, StyleSheet} from "react-native";
+import { ImageBackground, TouchableOpacity, View , Text, StyleSheet, Share} from "react-native";
 import { LinearGradient } from "react-native-linear-gradient";
 import { Icon } from "../../../component/ImageComp";
 import { SOCKET_URL } from "../../../utils/constant";
 import MySocket from "../../../utils/socket";
+import { RouteName } from "../../../utils/enum";
+import { navigationRef } from "../../../routes/navigationRef";
 const tag = "ProfileCard";
-export const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, onPress: () => void,  onPreviewGalery: (image : ImageEntity[]) => void }> = ({item, user, onPress , onPreviewGalery})=> {
+export const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, onPress: () => void, onPressViewProfile: (email: string)=> void ,  onPreviewGalery: (image : ImageEntity[]) => void }> = ({item, user, onPress , onPreviewGalery, onPressViewProfile})=> {
   const [isLoading, setLoading] = useState<boolean>(false);
 
     const [requestType, setRequestType] = useState<string>(item.requestType || '');
@@ -61,6 +63,25 @@ export const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, o
   if(requestType == 'accepted') return '#065912'
   return '#065912'
 }
+
+const shareProfile = async (item: ProfileEntity) => {
+  try {
+    const email = item.email ?? "";
+    const encodedEmail = encodeURIComponent(email);
+    const url = `https://humsafar-node.onrender.com/viewprofile/${encodedEmail}`;
+
+    await Share.share({
+      message: `Check my profile on Humsafar:\n${url}`,
+      url: url,
+      title: "Humsafar Profile"
+    });
+
+  } catch (error) {
+    console.log("Share error:", error);
+  }
+};
+
+
   return (
     <View style={styles.card}>
       <ImageBackground
@@ -100,7 +121,7 @@ export const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, o
       
           {
             requestType === 'invite' && <TouchableOpacity onPress={inviteUserApi}  style={[styles.request,{position:'absolute', right: 10, bottom: 10, backgroundColor:getColorType()}]}  activeOpacity={0.7}>
-             <Text style={[styles.mobile, {color: (item.requestType === 'invite' ) ? '#000000' : '#000000'}]}>{item.requestType}</Text>
+             <Text style={[styles.mobile, {color: themeColor.onlyWhite}]}>{item.requestType}</Text>
             </TouchableOpacity> 
           }
           {
@@ -110,17 +131,40 @@ export const ProfileCard  :React.FC<{item: ProfileEntity ,  user: User | null, o
           }
   
             {
-            requestType === 'accepted' && <TouchableOpacity onPress={onPress}  style={[{position:'absolute', right: 0, bottom: 0}]}  activeOpacity={0.7}>
+            requestType === 'accepted' && <View style={{flexDirection:'row', alignItems:'center', position:'absolute', right: 0, bottom: 0}}>
+              <TouchableOpacity onPress={()=> {
+                                            onPressViewProfile(item?.email || 'sasasa')
+                        }}  activeOpacity={0.7}>
+
+                <Text style={[styles.request,{backgroundColor:themeColor.onlyWhite,color: themeColor.black}]}>View</Text>
+             </TouchableOpacity> 
+
+
+            <TouchableOpacity onPress={()=> {
+                shareProfile(item)
+            }}  activeOpacity={0.7}>
                                             <Icon
-                                              size={40}
-                                              tintColor={themeColor.chat}
+                                              size={30}
+                                              tintColor={themeColor.onlyWhite}
+                                              margin={10}
+                                              source={
+                                                     require("../../../../assets/ic_share.png")
+                                                    }
+                                            />
+             </TouchableOpacity> 
+
+              <TouchableOpacity onPress={onPress}  activeOpacity={0.7}>
+                                            <Icon
+                                              size={30}
+                                              tintColor={themeColor.onlyWhite}
                                               margin={10}
                                               source={
                                                      require("../../../../assets/ic_chat.png")
                                                     }
                                             />
                                             
-            </TouchableOpacity> 
+             </TouchableOpacity> 
+            </View>
           }
             </View>
 

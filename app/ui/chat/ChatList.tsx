@@ -67,18 +67,17 @@ export const ChatListScreen: React.FC<Props> = ({ navigation }) => {
               keyExtractor={item => item.time}
               renderItem={({ item }) => (
                 <ChatListItem
-                  mobile={user?.mobile}
                   user={item}
                   onPress={() =>{
                      const socket = MySocket.getInstance().getSocket();
                       socket?.emit('readMsg', {
-                      sender : user?.mobile,
-                      reciever : item?.mobile
+                      sender : user?.email,
+                      reciever : item?.email
                     });
 
                     const handleReadMsg = () => {
                       socket?.emit('getchatList', {
-                        mobile : user?.mobile
+                        mobile : user?.email
                       });
                       navigation.navigate(RouteName.ChatHistory, { user: item })
                     };
