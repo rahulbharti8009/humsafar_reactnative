@@ -2,7 +2,7 @@ permissions:
   contents: write
 on:
   push:
-    branches: [master, develop]
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -53,8 +53,8 @@ jobs:
      
       - name: Debug Secrets
         run: |
-          echo "User: ${{ secrets.EMAIL_USER }}"
-          echo "Pass length: ${#EMAIL_PASS}"
+          echo "User: ${{ secrets.EMAILUSER }}"
+          echo "Pass length: ${#GOOGLEPASSKEY}"
         env:
           GOOGLEPASSKEY: ${{ secrets.GOOGLEPASSKEY }}
 
