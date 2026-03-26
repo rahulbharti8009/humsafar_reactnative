@@ -76,8 +76,9 @@ jobs:
       - name: Send Email
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: smtp.gmail.com
-          server_port: 465
+          server_address: smtp.gmail.com          
+          server_port: 587
+          secure: false
           username: ${{ secrets.EMAIL_USER }}
           password: ${{ secrets.GOOGLEPASSKEY }}
           subject: "APK Build Success 🚀"
