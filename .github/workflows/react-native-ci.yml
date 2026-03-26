@@ -54,6 +54,7 @@ jobs:
       - name: Debug Secrets
         run: |
           echo "User: ${{ secrets.EMAILUSER }}"
+          echo "User var: ${{ vars.EMAILUSER }}"
           echo "Pass length: ${#GOOGLEPASSKEY}"
         env:
           GOOGLEPASSKEY: ${{ secrets.GOOGLEPASSKEY }}
