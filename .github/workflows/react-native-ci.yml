@@ -56,7 +56,7 @@ jobs:
           echo "User: ${{ secrets.EMAIL_USER }}"
           echo "Pass length: ${#EMAIL_PASS}"
         env:
-          EMAIL_PASS: ${{ secrets.GOOGLEPASSKEY }}
+          GOOGLEPASSKEY: ${{ secrets.GOOGLEPASSKEY }}
 
       - name: Build APK
         run: |
