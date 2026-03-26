@@ -1,3 +1,5 @@
+permissions:
+  contents: write
 on:
   push:
     branches: [master, develop]
@@ -53,11 +55,22 @@ jobs:
         run: |
           cd android
           ./gradlew assembleDebug
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      #✅ Upload to Release (NEW)
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: APK Build v${{ github.run_number }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ✅ ADD EMAIL STEP HERE
       - name: Send Email
@@ -69,8 +82,21 @@ jobs:
           password: ${{ secrets.GOOGLEPASSKEY }}
           subject: "APK Build Success 🚀"
           body: |
-            Your APK build is ready.
-                      Download it from GitHub Actions:
-            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-                        to: lovelybharti9292@gmail.com
+            Hello,
+
+            ✅ Your APK build has been completed successfully.
+
+            📦 Download your APK from the link below:
+            https://github.com/${{ github.repository }}/releases/download/v${{ github.run_number }}/app-debug.apk
+
+            🔍 Build Details:
+            - Repository: ${{ github.repository }}
+            - Branch: ${{ github.ref_name }}
+            - Commit: ${{ github.sha }}
+            - Triggered by: ${{ github.actor }}
+
+            Thanks,
+            GitHub Actions 🤖
+
+          to: lovelybharti9292@gmail.com
           from: GitHub Actions
