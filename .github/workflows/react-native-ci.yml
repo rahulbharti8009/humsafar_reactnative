@@ -50,18 +50,20 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Build APK
-        run: |
-          cd android
-          ./gradlew assembleDebug
-
+     
       - name: Debug Secrets
         run: |
           echo "User: ${{ secrets.EMAIL_USER }}"
           echo "Pass length: ${#EMAIL_PASS}"
         env:
           EMAIL_PASS: ${{ secrets.GOOGLEPASSKEY }}
+
+      - name: Build APK
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
