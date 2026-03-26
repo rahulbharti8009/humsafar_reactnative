@@ -31,6 +31,7 @@ jobs:
     
   android-build:
     runs-on: ubuntu-latest
+    environment: auto mail   # 👈 match your env name
 
     steps:
       - name: Checkout code
@@ -53,10 +54,11 @@ jobs:
      
       - name: Debug Secrets
         run: |
-          echo "User: ${{ secrets.EMAILUSER }}"
-          echo "User var: ${{ vars.EMAILUSER }}"
+          echo "User: ${{ secrets.EMAIL_USER }}"
+          echo "User var: ${{ vars.EMAIL_USER }}"
           echo "Pass length: ${#GOOGLEPASSKEY}"
         env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
           GOOGLEPASSKEY: ${{ secrets.GOOGLEPASSKEY }}
 
       - name: Build APK
