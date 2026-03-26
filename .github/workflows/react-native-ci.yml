@@ -3,7 +3,7 @@ name: React Native CI
 on:
   push:
     branches: [master, develop]
-  pull_request:
+    pull_request:
     branches: [master]
 
 jobs:

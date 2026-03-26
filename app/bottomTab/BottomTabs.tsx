@@ -16,7 +16,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { Chat, Invite } from '../types/auth';
 import {  setProfileRedux } from '../redux/slice/profileSlice';
 import { useDeepLink } from '../theme/DeepLinkContext';
-import { Alert, Linking } from 'react-native';
+import { Alert, Image, Linking } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -148,21 +148,24 @@ useEffect((): (() => void) | void => {
 
         // ✅ Dynamic Icons
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string = '';
+          let iconName: any = '';
 
           if (route.name === 'DashboardTab') {
-            iconName = focused ? 'home' : 'home-outline';
+            iconName = focused ? require('../../assets/ic_home2.png') : require('../../assets/ic_home2.png');
           } else if (route.name === 'Chat') {
-            iconName = focused ? 'chatbubble' : 'chatbubble-outline';
+            iconName = focused ? require('../../assets/ic_chat.png') : require('../../assets/ic_chat.png');
           } else if (route.name === 'Invite') {
-            iconName = focused ? 'person-add' : 'person-add-outline';
-          } else if (route.name === 'ProfileTab') {
-            iconName = focused ? 'person' : 'person-outline';
+            iconName = focused ? require('../../assets/ic_user.png') : require('../../assets/ic_user.png');
           }
 
           return (
-            <Ionicons name={iconName} size={size} color={color} />
-          );
+    <Image
+      source={iconName}
+      style={{ width: 24, height: 24 }}
+      tintColor={color}
+      resizeMode="contain"
+    />
+  );
         },
       })}
     >

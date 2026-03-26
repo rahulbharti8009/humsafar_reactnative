@@ -16,7 +16,7 @@ export const InviteListItem: React.FC<{user: Invite ,  onPress: (requestType: st
     
     <MyCircle color={user.color}>
       <Text style={[styles.avatarText, { color: themeColor.text }]}>
-        {user.mobile?.[0]}
+        {user.email?.[0]}
       </Text>
     </MyCircle>
 
